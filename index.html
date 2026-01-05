@@ -1,39 +1,81 @@
-src/
-│
-├── App.jsx
-├── CharacterForm.jsx
-├── styles.css
-└── index.js
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './styles.css';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Construcción del Personaje</title>
+  <style>
+    @media print {
+      .print-button {
+        display: none;
+      }
+    }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
-import React from 'react';
-import CharacterForm from './CharacterForm';
-import './styles.css';
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fef9fc;
+      color: #3d1f2f;
+      margin: 0;
+      padding: 0;
+    }
 
-function App() {
-  const handlePrint = () => {
-    window.print();
-  };
+    .app {
+      padding: 2cm 1cm 2cm 3cm; /* margen izquierdo para perforaciones */
+      background-color: #fff0f5;
+    }
 
-  return (
-    <div className="app">
-      <button className="print-button" onClick={handlePrint}>Imprimir</button>
-      <CharacterForm />
-    </div>
-  );
-}
+    .character-form {
+      background-color: #fff7fb;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(124, 76, 87, 0.1);
+      border-left: 10px solid #d8a1c4;
+    }
 
-export default App;
-import React from 'react';
+    .character-form h1 {
+      text-align: center;
+      font-size: 2rem;
+      color: #9d6480;
+      margin-bottom: 1rem;
+    }
 
-function CharacterForm() {
-  return (
-    <div className="character-form">
+    .character-form h2 {
+      color: #b57697;
+      font-size: 1.2rem;
+      margin-top: 1.5rem;
+    }
+
+    .character-form h3 {
+      color: #c193aa;
+      margin-top: 1rem;
+    }
+
+    .character-form ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .character-form li {
+      margin: 0.4rem 0;
+      padding: 0.3rem;
+      border-bottom: 1px dashed #d9a8c1;
+    }
+
+    .print-button {
+      margin: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #eac6dc;
+      color: #5c2b42;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <button class="print-button" onclick="window.print()">Imprimir</button>
+    <div class="character-form">
       <h1>Construcción del Personaje</h1>
 
       <section>
@@ -149,72 +191,6 @@ function CharacterForm() {
         </ul>
       </section>
     </div>
-  );
-}
-
-export default CharacterForm;
-@media print {
-  .print-button {
-    display: none;
-  }
-}
-
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #fef9fc;
-  color: #3d1f2f;
-  margin: 0;
-  padding: 0;
-}
-
-.app {
-  padding: 2cm 1cm 2cm 3cm; /* margen izquierdo para perforaciones */
-  background-color: #fff0f5;
-}
-
-.character-form {
-  background-color: #fff7fb;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 0 5px rgba(124, 76, 87, 0.1);
-  border-left: 10px solid #d8a1c4;
-}
-
-.character-form h1 {
-  text-align: center;
-  font-size: 2rem;
-  color: #9d6480;
-  margin-bottom: 1rem;
-}
-
-.character-form h2 {
-  color: #b57697;
-  font-size: 1.2rem;
-  margin-top: 1.5rem;
-}
-
-.character-form h3 {
-  color: #c193aa;
-  margin-top: 1rem;
-}
-
-.character-form ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.character-form li {
-  margin: 0.4rem 0;
-  padding: 0.3rem;
-  border-bottom: 1px dashed #d9a8c1;
-}
-
-.print-button {
-  margin: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #eac6dc;
-  color: #5c2b42;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
+  </div>
+</body>
+</html>
