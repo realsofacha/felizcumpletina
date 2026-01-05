@@ -1,663 +1,220 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arquitectura de Personaje</title>
-
-  <!-- React & ReactDOM (DEV para editar) -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-
-  <!-- Babel -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Tipografías más sólidas -->
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-  <style>
-    :root{
-      --bg1:#f4efe9;
-      --bg2:#efe7df;
-      --paper:#ffffff;
-      --ink:#23161b;       /* texto principal (más oscuro) */
-      --muted:#5c4a52;     /* secundario */
-      --muted2:#7a6670;    /* terciario */
-      --accent:#5a2a3a;    /* uva profundo */
-      --accent2:#3f1e2a;   /* uva más oscuro */
-      --line:#c9b8bf;      /* líneas */
-      --soft:#f6f1f3;      /* panel suave */
-      --shadow: 0 20px 70px rgba(30, 10, 18, .16);
-    }
-
-    body{
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(1200px 700px at 12% 0%, rgba(90,42,58,.12), transparent 60%),
-        radial-gradient(1000px 650px at 90% 15%, rgba(35,22,27,.10), transparent 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-      overflow-x:hidden;
-    }
-
-    .font-serif{ font-family: 'Crimson Pro', serif; }
-
-    /* Papel con textura muy sutil */
-    .paper{
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.96)),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg fill='%23c9b8bf' fill-opacity='0.18'%3E%3Ccircle cx='24' cy='28' r='1.1'/%3E%3Ccircle cx='98' cy='62' r='1.0'/%3E%3Ccircle cx='156' cy='44' r='1.1'/%3E%3Ccircle cx='62' cy='132' r='1.1'/%3E%3Ccircle cx='138' cy='154' r='0.9'/%3E%3Ccircle cx='34' cy='170' r='1.0'/%3E%3C/g%3E%3C/svg%3E");
-      background-size: cover, 200px 200px;
-    }
-
-    /* Animación suave */
-    .fade-in{ animation: fadeIn .30s ease-out; }
-    @keyframes fadeIn{
-      from{ opacity:0; transform: translateY(6px); }
-      to{ opacity:1; transform: translateY(0); }
-    }
-
-    /* inputs */
-    .field{
-      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
-      background: rgba(255,255,255,.75);
-    }
-    .field:focus{
-      outline:none;
-      border-color: var(--accent);
-      box-shadow: 0 16px 30px rgba(90,42,58,.12);
-      background: rgba(255,255,255,.92);
-    }
-
-    /* --- PRINT A4 --- */
-    @media print{
-      @page{ size:A4; margin:0; }
-      body{
-        background: white !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .no-print{ display:none !important; }
-
-      /* IMPORTANTE: contenedor ocupa toda la hoja */
-      .print-container{
-        width: 210mm !important;
-        min-height: 297mm !important;
-        margin: 0 !important;
-        border: none !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        background: white !important;
-
-        /* margen izquierdo para perforación + respiración */
-        padding: 14mm 14mm 14mm 28mm !important;
-      }
-
-      input, textarea{
-        background: transparent !important;
-        color: black !important;
-        border-color: #777 !important;
-      }
-
-      /* que la guía de agujeros sea visible y exacta */
-      .hole-guide{
-        opacity: .55 !important;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useEffect, useMemo, useState } = React;
-
-    // ICONOS
-    const IconUser = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/>
-      </svg>
-    );
-    const IconEye = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-    );
-    const IconMap = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
-        <path d="M2 12h20"/>
-      </svg>
-    );
-    const IconGroup = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-    );
-    const IconSave = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-        <polyline points="17 21 17 13 7 13 7 21"/>
-        <polyline points="7 3 7 8 15 8"/>
-      </svg>
-    );
-    const IconPrint = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="6 9 6 2 18 2 18 9"/>
-        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-        <rect width="12" height="8" x="6" y="14"/>
-      </svg>
-    );
-    const IconBook = () => (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
-      </svg>
-    );
-
-    // --- Componentes ---
-    const Field = ({ data, update, id, label, help, multi, placeholder }) => (
-      <div className="mb-6">
-        <label className="block text-[11px] font-extrabold uppercase tracking-[0.18em] text-[var(--accent)] mb-2">
-          {label}
-        </label>
-
-        {multi ? (
-          <textarea
-            value={data[id] || ""}
-            onChange={(e) => update(id, e.target.value)}
-            className="field w-full border border-[var(--line)] rounded-xl px-3 py-2 text-[var(--ink)] font-serif text-[15px] leading-6 min-h-[88px]"
-            placeholder={placeholder}
-          />
-        ) : (
-          <input
-            value={data[id] || ""}
-            onChange={(e) => update(id, e.target.value)}
-            className="field w-full border border-[var(--line)] rounded-xl px-3 py-2 text-[var(--ink)] font-serif text-[15px]"
-            placeholder={placeholder}
-          />
-        )}
-
-        {help && (
-          <p className="mt-2 text-[12px] text-[var(--muted2)] font-serif italic leading-5">
-            {help}
-          </p>
-        )}
-      </div>
-    );
-
-    const CheckItem = ({ data, update, id, text, subtext }) => (
-      <div className="flex items-start gap-3 mb-3">
-        <input
-          type="checkbox"
-          checked={!!data[id]}
-          onChange={(e) => update(id, e.target.checked)}
-          className="mt-1 w-4 h-4 accent-[var(--accent)] cursor-pointer"
-        />
-        <div>
-          <div className="text-[14px] font-extrabold text-[var(--accent2)]">{text}</div>
-          {subtext && <div className="text-[12px] text-[var(--muted2)] font-serif italic">{subtext}</div>}
-        </div>
-      </div>
-    );
-
-    // --- Guía de perforación A4 (ISO 838) ---
-    // 2 agujeros, separados 80mm, centrados verticalmente en A4 (alto 297mm)
-    // Centros desde arriba:
-    // 297/2 - 40 = 108.5mm
-    // 297/2 + 40 = 188.5mm
-    // Centro horizontal del agujero: ~12mm desde el borde izquierdo.
-    const HoleGuides = () => (
-      <div className="hole-guide pointer-events-none">
-        {[108.5, 188.5].map((topMm, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: "12mm",
-              top: `${topMm}mm`,
-              transform: "translate(-50%, -50%)",
-              width: "10mm",
-              height: "10mm",
-              border: "1.2px solid var(--accent)",
-              borderRadius: "999px",
-              opacity: 0.22
-            }}
-          >
-            <div style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: "10mm",
-              height: "1px",
-              background: "var(--accent)",
-              transform: "translate(-50%, -50%)",
-              opacity: 0.65
-            }} />
-            <div style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: "1px",
-              height: "10mm",
-              background: "var(--accent)",
-              transform: "translate(-50%, -50%)",
-              opacity: 0.65
-            }} />
-          </div>
-        ))}
-      </div>
-    );
-
-    const App = () => {
-      const [page, setPage] = useState(1);
-      const [data, setData] = useState({});
-      const [saving, setSaving] = useState(false);
-      const [toast, setToast] = useState("");
-
-      const storageKey = "cuaderno_personaje_a4_v3_noai";
-
-      useEffect(() => {
-        try {
-          const saved = localStorage.getItem(storageKey);
-          if (saved) setData(JSON.parse(saved));
-        } catch {}
-      }, []);
-
-      useEffect(() => {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(data));
-        } catch {}
-      }, [data]);
-
-      const update = (key, val) => setData(prev => ({ ...prev, [key]: val }));
-
-      const manualSave = () => {
-        setSaving(true);
-        setToast("Guardado ✓");
-        setTimeout(() => { setSaving(false); setToast(""); }, 1100);
-      };
-
-      const tabs = [
-        { id: 1, title: "Identidad & Motor", icon: <IconUser /> },
-        { id: 2, title: "Presencia & Voz", icon: <IconEye /> },
-        { id: 3, title: "Mapa Social", icon: <IconMap /> },
-        { id: 4, title: "Dinámicas & Arco", icon: <IconGroup /> },
-      ];
-
-      return (
-        <div className="min-h-screen flex flex-col items-center p-4 md:p-8">
-          {/* Toast */}
-          {toast && (
-            <div className="no-print fixed top-4 right-4 z-50 bg-white/90 backdrop-blur border border-[var(--line)] shadow-xl rounded-2xl px-4 py-2 text-xs font-extrabold text-[var(--accent)]">
-              {toast}
-            </div>
-          )}
-
-          {/* Header */}
-          <header className="no-print w-full max-w-5xl mb-5 flex flex-col md:flex-row md:justify-between md:items-end gap-3">
-            <div className="flex items-center gap-4">
-              <div className="bg-[var(--accent)] text-white p-3 rounded-2xl shadow-lg">
-                <IconBook />
-              </div>
-              <div>
-                <h1 className="text-3xl md:text-4xl font-serif font-bold text-[var(--accent2)] leading-tight">
-                  Construcción del Personaje
-                </h1>
-                <p className="mt-1 text-[12px] font-extrabold uppercase tracking-[0.28em] text-[var(--muted)]">
-                  Cuaderno de escritura · A4
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={manualSave}
-                className="flex items-center gap-2 px-4 py-2 bg-white/85 backdrop-blur border border-[var(--line)] rounded-xl text-xs font-extrabold text-[var(--accent2)] hover:bg-white transition shadow-sm"
-              >
-                <IconSave /> {saving ? "Guardado" : "Guardar"}
-              </button>
-              <button
-                onClick={() => window.print()}
-                className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white rounded-xl text-xs font-extrabold hover:brightness-95 transition shadow-lg"
-              >
-                <IconPrint /> Imprimir
-              </button>
-            </div>
-          </header>
-
-          {/* Tabs */}
-          <div className="no-print w-full max-w-5xl">
-            <div className="bg-white/70 backdrop-blur border border-[var(--line)] rounded-2xl p-2 shadow-lg">
-              <div className="flex flex-wrap gap-2">
-                {tabs.map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => setPage(t.id)}
-                    className={[
-                      "flex items-center gap-2 px-4 py-3 rounded-xl text-[11px] font-extrabold uppercase tracking-[0.22em] transition",
-                      page === t.id
-                        ? "bg-[var(--accent)] text-white shadow"
-                        : "bg-transparent text-[var(--muted)] hover:bg-white"
-                    ].join(" ")}
-                  >
-                    <span className={page === t.id ? "text-white" : "text-[var(--muted)]"}>{t.icon}</span>
-                    {t.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* A4 Paper */}
-          <div className="paper w-full max-w-5xl mt-4 shadow-[var(--shadow)] min-h-[1123px] relative p-10 md:p-14 print-container fade-in rounded-3xl border border-white/60">
-            {/* Guías de agujeros (alineadas para imprimir) */}
-            <HoleGuides />
-
-            {/* Título para impresión */}
-            <div className="hidden print:block mb-6 border-b-2 pb-2" style={{ borderColor: "var(--accent)" }}>
-              <h2 className="text-2xl font-serif font-bold" style={{ color: "var(--accent2)" }}>
-                {tabs.find(t => t.id === page).title}
-              </h2>
-              <p className="text-xs font-extrabold uppercase tracking-[0.25em]" style={{ color: "var(--muted)" }}>
-                Personaje: {data.nombre_completo || "_________"}
-              </p>
-            </div>
-
-            {/* PAGE 1 */}
-            {page === 1 && (
-              <div>
-                <div className="flex justify-between items-center mb-6 border-b pb-2" style={{ borderColor: "rgba(0,0,0,.08)" }}>
-                  <h2 className="text-2xl font-serif font-semibold italic" style={{ color: "var(--accent2)" }}>
-                    Identidad y Concepto
-                  </h2>
-                </div>
-
-                <p className="text-sm font-serif italic mb-7" style={{ color: "var(--muted2)" }}>
-                  Fijar la imagen mental del personaje y su lugar en la obra.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  <Field data={data} update={update} id="nombre_completo" label="Nombre completo:" />
-                  <Field data={data} update={update} id="apodos" label="Apodo/s y quién se los dice:" />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  <Field data={data} update={update} id="edad_nacimiento" label="Edad y fecha de nacimiento:" />
-                  <Field data={data} update={update} id="ocupacion" label="Ocupación / Oficio:" />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  <Field data={data} update={update} id="rol_trama" label="Rol en la trama:" help="(Protagonista, antagonista, aliado, etc.)" />
-                  <Field data={data} update={update} id="arquetipo" label="Arquetipo en una palabra:" help="(Rebelde, cuidadora, cínico, etc.)" />
-                </div>
-
-                <Field
-                  data={data}
-                  update={update}
-                  id="concepto_central"
-                  label="Concepto central (Logline):"
-                  multi
-                  placeholder='"Es un/a [Adjetivo] que quiere [Objetivo] pero se enfrenta a [Obstáculo]"'
-                />
-                <Field
-                  data={data}
-                  update={update}
-                  id="contradiccion_principal"
-                  label="Contradicción principal:"
-                  help='Ej: "Valiente pero le teme a la oscuridad".'
-                />
-
-                <div className="mt-10 mb-6 border-b pb-2" style={{ borderColor: "rgba(0,0,0,.08)" }}>
-                  <h2 className="text-2xl font-serif font-semibold italic" style={{ color: "var(--accent2)" }}>
-                    El Motor Interno
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2">
-                  <Field data={data} update={update} id="herida" label="La Herida (El Fantasma):" multi help="Evento del pasado que condiciona sus acciones." />
-                  <Field data={data} update={update} id="mentira" label="La Mentira que se cuenta:" multi help='Creencia falsa para no sufrir. Ej: "No necesito a nadie".' />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  <Field data={data} update={update} id="deseo" label="Lo que CREE que quiere (Deseo):" />
-                  <Field data={data} update={update} id="necesidad" label="Lo que REALMENTE necesita (Necesidad):" />
-                </div>
-
-                <Field data={data} update={update} id="linea_roja" label="Línea roja:" help="¿Qué juró que NUNCA haría?" />
-              </div>
-            )}
-
-            {/* PAGE 2 */}
-            {page === 2 && (
-              <div>
-                <div className="mb-6 border-b pb-2" style={{ borderColor: "rgba(0,0,0,.08)" }}>
-                  <h2 className="text-2xl font-serif font-semibold italic" style={{ color: "var(--accent2)" }}>
-                    Presencia Física
-                  </h2>
-                </div>
-
-                <p className="text-sm font-serif italic mb-7" style={{ color: "var(--muted2)" }}>
-                  Cómo el lector lo percibe en la página.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  <div>
-                    <Field data={data} update={update} id="rasgo_fisico" label="Rasgo físico distintivo:" help="Eso que el narrador mencionará más de una vez." />
-                    <Field data={data} update={update} id="delatador" label='El "Delatador":' help="Gesto inconsciente cuando miente o está nervioso." />
-                    <Field data={data} update={update} id="estilo_movimiento" label="Estilo de movimiento:" help="¿Torpe, elegante, ocupa espacio, se encoge?" />
-                  </div>
-
-                  <div className="bg-[var(--soft)] border border-[var(--line)] rounded-2xl p-5">
-                    <h3 className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[var(--accent)] mb-3">
-                      Firma sensorial
-                    </h3>
-                    <Field data={data} update={update} id="olor" label="¿A qué huele?" />
-                    <Field data={data} update={update} id="tacto" label="¿Cómo es su tacto?" />
-                    <Field data={data} update={update} id="sonido_llegar" label="¿Qué sonido hace al llegar?" />
-                  </div>
-                </div>
-
-                <Field data={data} update={update} id="objetos_carga" label="Objetos con carga emocional:" multi help="Algo que siempre lleva encima y por qué." />
-
-                <div className="mt-10 mb-6 border-b pb-2" style={{ borderColor: "rgba(0,0,0,.08)" }}>
-                  <h2 className="text-2xl font-serif font-semibold italic" style={{ color: "var(--accent2)" }}>
-                    Voz y Comportamiento Social
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  <Field data={data} update={update} id="tono_voz" label="Tono de voz y ritmo:" help="¿Rápido, susurra, gritón, culto, etc.?" />
-                  <Field data={data} update={update} id="muletilla" label="Muletilla o palabra recurrente:" />
-                  <Field data={data} update={update} id="actitud_autoridad" label="Actitud frente a la autoridad:" />
-                  <Field data={data} update={update} id="sentido_humor" label="Sentido del humor:" help="Irónico, nulo, infantil, negro, etc." />
-                </div>
-
-                <div className="mt-6 pt-4 border-t" style={{ borderColor: "rgba(0,0,0,.08)" }}>
-                  <label className="block text-[11px] font-extrabold uppercase tracking-[0.18em] text-[var(--accent)] mb-3">
-                    Dos frases típicas que diría
-                  </label>
-
-                  {[1,2].map(n => (
-                    <div key={n} className="flex gap-3 items-end mb-4">
-                      <span className="text-2xl font-serif italic" style={{ color: "var(--muted2)" }}>{n}.</span>
-                      <input
-                        value={data[`frase_${n}`] || ""}
-                        onChange={(e) => update(`frase_${n}`, e.target.value)}
-                        className="field w-full border border-[var(--line)] rounded-xl px-3 py-2 font-serif italic text-[15px]"
-                        placeholder="Escribí acá..."
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* PAGE 3 */}
-            {page === 3 && (
-              <div>
-                <div className="mb-6 border-b pb-2" style={{ borderColor: "rgba(0,0,0,.08)" }}>
-                  <h2 className="text-2xl font-serif font-semibold italic" style={{ color: "var(--accent2)" }}>
-                    El Mapa Social
-                  </h2>
-                </div>
-
-                <p className="text-sm font-serif italic mb-7" style={{ color: "var(--muted2)" }}>
-                  Ubicar al personaje en su red de contactos y entender su reputación.
-                </p>
-
-                <h3 className="text-[14px] font-extrabold text-[var(--accent2)] mb-3">1. Círculos de pertenencia</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-                  <CheckItem data={data} update={update} id="circulo_familia" text="Familia" subtext="¿Sólido, roto, ausente, tóxico?" />
-                  <CheckItem data={data} update={update} id="circulo_intimo" text="Círculo íntimo" subtext="Amigos, pareja o aliados de confianza." />
-                  <CheckItem data={data} update={update} id="circulo_funcional" text="Círculo funcional" subtext="Colegas, jefes, subordinados." />
-                  <CheckItem data={data} update={update} id="circulo_interes" text="Círculo de interés" subtext="Ideología, hobbies, militancia, etc." />
-                  <div className="md:col-span-2">
-                    <CheckItem data={data} update={update} id="circulo_extra" text='Círculos "extraños" o periféricos' subtext="Gente con la que se cruza pero no encaja." />
-                  </div>
-                </div>
-
-                <h3 className="text-[14px] font-extrabold text-[var(--accent2)] mb-3">2. Estatus y poder social</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6">
-                  <Field data={data} update={update} id="imagen_publica" label="¿Cómo lo ve el mundo (Imagen pública)?" help='Ej: "El que resuelve", "el bufón", "el que necesita ayuda".' />
-                  <Field data={data} update={update} id="autoimagen_social" label="¿Cómo se ve él mismo dentro de la sociedad?" />
-                </div>
-
-                <div className="bg-[var(--soft)] border border-[var(--line)] p-5 rounded-2xl mb-6">
-                  <label className="block text-[11px] font-extrabold uppercase tracking-[0.18em] text-[var(--accent)] mb-2">
-                    Nivel de influencia
-                  </label>
-                  <p className="text-[12px] font-serif italic mb-3" style={{ color: "var(--muted2)" }}>
-                    Capacidad de pedir favores o ser escuchado.
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                      <button
-                        key={n}
-                        onClick={() => update("nivel_influencia", n)}
-                        className={[
-                          "w-9 h-9 rounded-xl border text-[12px] font-extrabold transition",
-                          data.nivel_influencia === n
-                            ? "bg-[var(--accent)] text-white border-[var(--accent)]"
-                            : "bg-white/70 text-[var(--muted)] border-[var(--line)] hover:bg-white"
-                        ].join(" ")}
-                      >
-                        {n}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <Field data={data} update={update} id="insider_outsider" label='¿Es un "insider" o un "outsider"?' help="¿Parte del sistema o observador externo que no encaja?" />
-              </div>
-            )}
-
-            {/* PAGE 4 */}
-            {page === 4 && (
-              <div>
-                <div className="mb-6 border-b pb-2" style={{ borderColor: "rgba(0,0,0,.08)" }}>
-                  <h2 className="text-2xl font-serif font-semibold italic" style={{ color: "var(--accent2)" }}>
-                    Dinámicas y Arco
-                  </h2>
-                </div>
-
-                <div className="mb-6 border border-dashed rounded-3xl p-6" style={{ borderColor: "var(--line)", background: "rgba(255,255,255,.60)" }}>
-                  <h3 className="text-[14px] font-extrabold text-[var(--accent2)] mb-2">3. Sociograma (esquema visual)</h3>
-                  <p className="text-[12px] font-serif italic" style={{ color: "var(--muted2)" }}>
-                    Centro: tu personaje. Alrededor: otros personajes/grupos/factores. Flechas para interés o tensión.
-                  </p>
-                  <div className="mt-4 h-56 rounded-3xl border-2 border-dashed flex items-center justify-center"
-                       style={{ borderColor: "var(--line)", background: "rgba(255,255,255,.65)" }}>
-                    <div className="w-32 h-32 rounded-full border-2 bg-white shadow-sm"
-                         style={{ borderColor: "var(--accent)" }} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
-                  <Field data={data} update={update} id="vinculo_anclaje" label="Vínculo de anclaje:" help="¿Quién lo calma? ¿Qué representa?" />
-                  <Field data={data} update={update} id="vinculo_practico" label="Problema práctico:" help="¿A quién busca por plata/ayuda física?" />
-                  <Field data={data} update={update} id="vinculo_emocional" label="Problema emocional:" />
-                  <Field data={data} update={update} id="protege_personaje" label="¿A quién protege?" />
-                  <Field data={data} update={update} id="vinculo_tension" label="Vínculo de tensión:" help="¿A quién detesta y por qué?" />
-                  <Field data={data} update={update} id="obstaculo_social" label="Obstáculo social:" />
-                  <Field data={data} update={update} id="envidia_personaje" label="¿Qué envidia?" />
-                  <Field data={data} update={update} id="vinculo_espejo" label="Vínculo espejo:" help="¿Quién muestra lo que podría haber sido?" />
-                </div>
-
-                <div className="p-6 rounded-3xl text-white mb-10" style={{ background: "linear-gradient(135deg, var(--accent), var(--accent2))" }}>
-                  <h3 className="text-[12px] font-extrabold uppercase tracking-[0.22em] mb-4" style={{ color: "rgba(255,255,255,.86)" }}>
-                    5. Pez dentro y fuera del agua
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-[12px] font-extrabold mb-2">¿Dónde se siente cómodo y por qué?</label>
-                      <textarea
-                        value={data.pez_comodo || ""}
-                        onChange={(e) => update("pez_comodo", e.target.value)}
-                        className="w-full bg-black/20 border border-white/20 rounded-2xl px-3 py-2 font-serif text-[15px] leading-6"
-                        rows="2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[12px] font-extrabold mb-2">¿Dónde no, y qué siente?</label>
-                      <textarea
-                        value={data.pez_incomodo || ""}
-                        onChange={(e) => update("pez_incomodo", e.target.value)}
-                        className="w-full bg-black/20 border border-white/20 rounded-2xl px-3 py-2 font-serif text-[15px] leading-6"
-                        rows="2"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-6 border-b pb-2" style={{ borderColor: "rgba(0,0,0,.08)" }}>
-                  <h2 className="text-2xl font-serif font-semibold italic" style={{ color: "var(--accent2)" }}>
-                    Arco de transformación
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  <Field data={data} update={update} id="punto_a" label="Punto A (inicio):" />
-                  <Field data={data} update={update} id="detonante" label="Detonante:" />
-                  <Field data={data} update={update} id="sacrificio" label="Sacrificio:" />
-                  <Field data={data} update={update} id="punto_b" label="Punto B (final):" />
-                </div>
-              </div>
-            )}
-
-            {/* Footer */}
-            <div className="no-print mt-12 pt-6 border-t flex justify-between text-[10px] font-extrabold uppercase tracking-[0.28em]"
-                 style={{ borderColor: "rgba(0,0,0,.10)", color: "var(--muted)" }}>
-              <span>Volumen I</span>
-              <div className="flex gap-4">
-                <button disabled={page===1} onClick={() => setPage(p => p-1)} className="hover:text-[var(--accent2)] disabled:opacity-30 transition">
-                  Anterior
-                </button>
-                <button disabled={page===4} onClick={() => setPage(p => p+1)} className="hover:text-[var(--accent2)] disabled:opacity-30 transition">
-                  Siguiente
-                </button>
-              </div>
-              <span>Página {page} / 4</span>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<App />);
-  </script>
-</body>
-</html>
+src/
+│
+├── App.jsx
+├── CharacterForm.jsx
+├── styles.css
+└── index.js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './styles.css';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+import React from 'react';
+import CharacterForm from './CharacterForm';
+import './styles.css';
+
+function App() {
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="app">
+      <button className="print-button" onClick={handlePrint}>Imprimir</button>
+      <CharacterForm />
+    </div>
+  );
+}
+
+export default App;
+import React from 'react';
+
+function CharacterForm() {
+  return (
+    <div className="character-form">
+      <h1>Construcción del Personaje</h1>
+
+      <section>
+        <h2>Identidad y Concepto</h2>
+        <ul>
+          <li>Nombre completo:</li>
+          <li>Apodo/s y quién se los dice:</li>
+          <li>Edad y fecha de nacimiento:</li>
+          <li>Ocupación / Oficio:</li>
+          <li>Rol en la trama:</li>
+          <li>Arquetipo en una palabra:</li>
+          <li>Concepto central:</li>
+          <li>Contradicción principal:</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>El Motor Interno</h2>
+        <ul>
+          <li>La Herida (El Fantasma):</li>
+          <li>La Mentira que se cuenta:</li>
+          <li>Lo que CREE que quiere (Deseo):</li>
+          <li>Lo que REALMENTE necesita (Necesidad):</li>
+          <li>Línea roja:</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Presencia Física</h2>
+        <ul>
+          <li>Rasgo físico distintivo:</li>
+          <li>El "Delatador":</li>
+          <li>Estilo de movimiento:</li>
+          <li>Objetos con carga emocional:</li>
+          <li>Firma sensorial:</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Voz y Comportamiento Social</h2>
+        <ul>
+          <li>Tono de voz y ritmo:</li>
+          <li>Muletilla o palabra recurrente:</li>
+          <li>Actitud frente a la autoridad:</li>
+          <li>Sentido del humor:</li>
+          <li>Dos frases típicas que diría:</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>El Mapa Social</h2>
+        <h3>1. Círculos de Pertenencia</h3>
+        <ul>
+          <li>Familia:</li>
+          <li>Círculo Íntimo:</li>
+          <li>Círculo Funcional:</li>
+          <li>Círculo de Interés:</li>
+          <li>Círculos "Extraños" o Periféricos:</li>
+        </ul>
+        <h3>2. Estatus y Poder Social</h3>
+        <ul>
+          <li>¿Cómo lo ve el mundo (Imagen pública)?</li>
+          <li>¿Cómo se ve él mismo dentro de la sociedad?</li>
+          <li>Nivel de influencia: 1 — 2 — 3 — 4 — 5 — 6 — 7 — 8 — 9 — 10</li>
+          <li>¿Es un "Insider" o un "Outsider"?</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>El Sociograma (Esquema Visual)</h2>
+        <p>
+          En el centro del círculo va el nombre de tu personaje. Alrededor, escribís los nombres
+          de los otros personajes/grupos/factores. Usa flechas para marcar la dirección del interés
+          o la tensión.
+        </p>
+        <ul>
+          <li>Líneas continuas ( — ): Vínculos estables</li>
+          <li>Líneas punteadas ( - - ): Vínculos distantes o inciertos</li>
+          <li>Líneas en zigzag ( ~~~ ): Vínculos de conflicto o choque</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Dinámicas de Grupo</h2>
+        <ul>
+          <li>El Vínculo de Anclaje: ¿Quién calma al personaje?</li>
+          <li>¿A quién busca para ayuda práctica?</li>
+          <li>¿A quién busca para ayuda emocional?</li>
+          <li>¿A quién protege el personaje?</li>
+          <li>El Vínculo de Tensión: ¿A quién detesta?</li>
+          <li>¿Qué parte de sí mismo ve reflejada en esa persona?</li>
+          <li>¿Cuál es su mayor obstáculo social?</li>
+          <li>¿Qué envidia de otro personaje?</li>
+          <li>El Vínculo Espejo: ¿Qué otro representa lo que pudo ser?</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Pez dentro y fuera del agua</h2>
+        <ul>
+          <li>¿Dónde se siente más cómodo y por qué?</li>
+          <li>¿Dónde no encaja? ¿Qué siente?</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>El Arco de Transformación</h2>
+        <ul>
+          <li>Punto A (Inicio):</li>
+          <li>El Detonante:</li>
+          <li>El Sacrificio:</li>
+          <li>Punto B (Final):</li>
+        </ul>
+      </section>
+    </div>
+  );
+}
+
+export default CharacterForm;
+@media print {
+  .print-button {
+    display: none;
+  }
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #fef9fc;
+  color: #3d1f2f;
+  margin: 0;
+  padding: 0;
+}
+
+.app {
+  padding: 2cm 1cm 2cm 3cm; /* margen izquierdo para perforaciones */
+  background-color: #fff0f5;
+}
+
+.character-form {
+  background-color: #fff7fb;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(124, 76, 87, 0.1);
+  border-left: 10px solid #d8a1c4;
+}
+
+.character-form h1 {
+  text-align: center;
+  font-size: 2rem;
+  color: #9d6480;
+  margin-bottom: 1rem;
+}
+
+.character-form h2 {
+  color: #b57697;
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+}
+
+.character-form h3 {
+  color: #c193aa;
+  margin-top: 1rem;
+}
+
+.character-form ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.character-form li {
+  margin: 0.4rem 0;
+  padding: 0.3rem;
+  border-bottom: 1px dashed #d9a8c1;
+}
+
+.print-button {
+  margin: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #eac6dc;
+  color: #5c2b42;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
