@@ -1,267 +1,576 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arquitectura del Personaje</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura del Personaje</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Animaciones */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos de impresión */
+        @media print {
+            body { background: white; -webkit-print-color-adjust: exact; }
+            .no-print { display: none !important; }
+            .print-break-inside { break-inside: avoid; }
+            input, textarea { border: none !important; background: transparent !important; resize: none; padding: 0 !important; }
+            .section-content { display: block !important; height: auto !important; opacity: 1 !important; visibility: visible !important; }
+            .shadow-sm, .shadow-md { box-shadow: none !important; }
+            .border { border: 1px solid #eee !important; }
+        }
+
+        /* Utilidades personalizadas */
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
-  <div class="page">
-    <aside class="perforaciones">
-      <div class="hole"></div>
-      <div class="hole"></div>
-      <div class="hole"></div>
-    </aside>
+<body class="bg-slate-100 text-slate-800 pb-20">
 
-    <div class="cuaderno">
-      <header class="header">
-        <div>
-          <h1>Arquitectura del Personaje</h1>
-          <p class="subtitulo">Guía completa para diseñar personajes narrativos</p>
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20 no-print shadow-sm">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2 rounded-lg text-white">
+                    <i data-lucide="user" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 leading-tight">Arquitectura del Personaje</h1>
+                    <p class="text-xs text-slate-500 font-medium tracking-wide uppercase">Lienzo de Diseño Narrativo</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button onclick="app.clearData()" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Borrar todo">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </button>
+                <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium shadow-sm">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Exportar PDF</span>
+                </button>
+            </div>
         </div>
-        <div class="acciones">
-          <button onclick="window.print()" class="btn imprimir">Imprimir</button>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-6">
+        
+        <!-- Intro Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 flex flex-col md:flex-row gap-6 items-center print:border-none print:shadow-none print:mb-0">
+            <div class="flex-1 w-full">
+                <input type="text" id="nombre" placeholder="Nombre del Personaje"
+                    class="w-full text-3xl md:text-4xl font-black text-slate-900 placeholder:text-slate-300 border-b-2 border-transparent hover:border-slate-100 focus:border-indigo-500 focus:outline-none bg-transparent transition-all mb-2 data-input">
+                <input type="text" id="arquetipo" placeholder="Arquetipo (Ej: El Rebelde, La Cuidadora)"
+                    class="w-full text-lg font-medium text-indigo-600 placeholder:text-indigo-300/70 border-none focus:ring-0 bg-transparent p-0 data-input">
+            </div>
+            <div class="w-full md:w-auto flex flex-col gap-2 min-w-[200px] bg-slate-50 p-4 rounded-lg border border-slate-100 no-print">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Estado de Progreso</div>
+                <div class="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
         </div>
-      </header>
 
-      <nav class="tabs">
-        <button class="tab active" onclick="mostrarSeccion('identidad')">Identidad</button>
-        <button class="tab" onclick="mostrarSeccion('presencia')">Presencia</button>
-        <button class="tab" onclick="mostrarSeccion('mapa')">Mapa Social</button>
-        <button class="tab" onclick="mostrarSeccion('dinamicas')">Dinámicas</button>
-      </nav>
-
-      <main>
-        <section id="identidad" class="contenido-tab activo">
-          <!-- Bloque Identidad y Motor -->
-          <h2>Identidad y Concepto</h2>
-<p class="instruccion">El objetivo es fijar la imagen mental del personaje y su lugar en la obra.</p>
-
-<label>Nombre completo</label>
-<input type="text" />
-
-<label>Apodo/s y quién se los dice</label>
-<input type="text" />
-
-<label>Edad</label>
-<input type="number" min="0" />
-
-<label>Fecha de nacimiento</label>
-<input type="text" placeholder="DD/MM/AAAA" />
-
-<label>Ocupación / Oficio</label>
-<input type="text" />
-
-<label>Rol en la trama</label>
-<select>
-  <option>Protagonista</option>
-  <option>Antagonista</option>
-  <option>Aliado</option>
-  <option>Secundario</option>
-  <option>Otro</option>
-</select>
-
-<label>Arquetipo en una palabra</label>
-<input type="text" placeholder="Ej: El rebelde, la cuidadora, el cínico..." />
-
-<label>Concepto central</label>
-<textarea placeholder='Ej: "Es un/a [adjetivo] que quiere [objetivo] pero se enfrenta a [obstáculo]"'></textarea>
-
-<label>Contradicción principal</label>
-<textarea placeholder="Ej: Es un soldado valiente que le teme a la oscuridad"></textarea>
-
-<h2>El Motor Interno</h2>
-<p class="instruccion">Esto es lo que define sus decisiones.</p>
-
-<label>La Herida (El Fantasma)</label>
-<textarea placeholder="Un evento del pasado que todavía le duele o condiciona sus acciones"></textarea>
-
-<label>La Mentira que se cuenta</label>
-<textarea placeholder="¿Qué idea falsa cree sobre sí mismo o el mundo para no sufrir? Ej: 'No necesito a nadie'"></textarea>
-
-<label>Lo que CREE que quiere (Deseo)</label>
-<textarea></textarea>
-
-<label>Lo que REALMENTE necesita (Necesidad)</label>
-<textarea></textarea>
-
-<label>Línea roja</label>
-<textarea placeholder="¿Qué es lo que este personaje juró que NUNCA haría?"></textarea>
-
+        <!-- Plantillas de Sección (Renderizadas por JS o estáticas para estructura simple) -->
+        
+        <!-- 1. Identidad y Concepto -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="user" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">1. Identidad y Concepto</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Apodo/s y quién se los dice</label>
+                        <input type="text" id="apodos" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Edad / Fecha Nac.</label>
+                            <input type="text" id="edad" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Ocupación</label>
+                            <input type="text" id="ocupacion" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Rol en la trama</label>
+                        <input type="text" id="rol" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Contradicción Principal</label>
+                        <input type="text" id="contradiccion" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Concepto Central (Logline)</label>
+                    <p class="text-xs text-slate-500 mb-2 italic">Sintetiza la esencia del personaje en una frase.</p>
+                    <textarea id="concepto" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none min-h-[80px]"></textarea>
+                </div>
+            </div>
         </section>
-        <section id="presencia" class="contenido-tab">
-          <!-- Bloque Presencia física y voz -->
-          <h2>Presencia Física</h2>
-<p class="instruccion">Cómo el lector lo percibe en la página.</p>
 
-<label>Rasgo físico distintivo</label>
-<input type="text" placeholder="Eso que el narrador mencionará más de una vez" />
-
-<label>El 'Delatador'</label>
-<input type="text" placeholder="Ej: Un gesto inconsciente cuando miente o está nervioso" />
-
-<label>Estilo de movimiento</label>
-<textarea placeholder="¿Es torpe, elegante, ocupa mucho espacio, se encoge...?"></textarea>
-
-<label>Objetos con carga emocional</label>
-<textarea placeholder="Ej: Algo que siempre lleva encima y por qué"></textarea>
-
-<label>Firma sensorial</label>
-<textarea placeholder="¿A qué huele? ¿Cómo es su tacto? ¿Qué sonido hace al llegar?"></textarea>
-
-<h2>Voz y Comportamiento Social</h2>
-<p class="instruccion">Para que el diálogo sea único y no suene igual al de otros personajes.</p>
-
-<label>Tono de voz y ritmo</label>
-<textarea placeholder="Ej: Habla rápido, susurra, es gritón, usa palabras cultas..."></textarea>
-
-<label>Muletilla o palabra recurrente</label>
-<input type="text" />
-
-<label>Actitud frente a la autoridad</label>
-<textarea></textarea>
-
-<label>Sentido del humor</label>
-<select>
-  <option>Irónico</option>
-  <option>Nulo</option>
-  <option>Infantil</option>
-  <option>Negro</option>
-  <option>Otro</option>
-</select>
-
-<label>Dos frases típicas que diría</label>
-<input type="text" placeholder="Frase 1" />
-<input type="text" placeholder="Frase 2" />
-
+        <!-- 2. Motor Interno -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="heart" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">2. El Motor Interno</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <div class="p-4 bg-red-50 rounded-lg border border-red-100 mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">La Herida (El Fantasma)</label>
+                    <textarea id="herida" class="data-input w-full p-3 bg-white border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none min-h-[80px]"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">La Mentira que se cuenta</label>
+                    <input type="text" id="mentira" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Deseo (Lo que cree querer)</label>
+                        <input type="text" id="deseo" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Necesidad (Lo que realmente necesita)</label>
+                        <input type="text" id="necesidad" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Línea Roja (Qué NUNCA haría)</label>
+                    <input type="text" id="lineaRoja" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+            </div>
         </section>
-        <section id="mapa" class="contenido-tab">
-          <!-- Bloque Mapa social y sociograma -->
-          <h2>El Mapa Social</h2>
-<p class="instruccion">Ubicar al personaje en su red de contactos y entender su reputación.</p>
 
-<h3>1. Círculos de Pertenencia</h3>
-
-<label>Familia</label>
-<textarea placeholder="¿Es un núcleo sólido, roto, ausente, tóxico?"></textarea>
-
-<label>Círculo Íntimo</label>
-<textarea placeholder="Amigos, pareja, o aliados en los que confía"></textarea>
-
-<label>Círculo Funcional</label>
-<textarea placeholder="Colegas, jefes, subordinados"></textarea>
-
-<label>Círculo de Interés (Ideología / Hobbies)</label>
-<textarea placeholder="Clubes, religión, militancia, grupos de ocio"></textarea>
-
-<label>Círculos 'Extraños' o Periféricos</label>
-<textarea placeholder="Grupos con los que se cruza pero no encaja (ej: clase social distinta, bajo mundo, etc.)"></textarea>
-
-<h3>2. Estatus y Poder Social</h3>
-
-<label>¿Cómo lo ve el mundo? (Imagen pública)</label>
-<input type="text" placeholder='Ej: "El que resuelve problemas", "El bufón del grupo"...' />
-
-<label>¿Cómo se ve él mismo dentro de la sociedad?</label>
-<input type="text" placeholder='Ej: Un impostor, un líder incomprendido...' />
-
-<label>Nivel de influencia</label>
-<div class="checkbox-group">
-  <span class="checkbox-item"><input type="radio" name="influencia" value="1" /> 1</span>
-  <span class="checkbox-item"><input type="radio" name="influencia" value="2" /> 2</span>
-  <span class="checkbox-item"><input type="radio" name="influencia" value="3" /> 3</span>
-  <span class="checkbox-item"><input type="radio" name="influencia" value="4" /> 4</span>
-  <span class="checkbox-item"><input type="radio" name="influencia" value="5" /> 5</span>
-  <span class="checkbox-item"><input type="radio" name="influencia" value="6" /> 6</span>
-  <span class="checkbox-item"><input type="radio" name="influencia" value="7" /> 7</span>
-  <span class="checkbox-item"><input type="radio" name="influencia" value="8" /> 8</span>
-  <span class="checkbox-item"><input type="radio" name="influencia" value="9" /> 9</span>
-  <span class="checkbox-item"><input type="radio" name="influencia" value="10" /> 10</span>
-</div>
-
-<label>¿Es un Insider o un Outsider?</label>
-<select>
-  <option>Insider</option>
-  <option>Outsider</option>
-  <option>No definido</option>
-</select>
-
-<h3>3. Sociograma (Esquema Visual)</h3>
-<p>
-  En el centro del círculo va el nombre de tu personaje. Alrededor, escribí los nombres de los otros personajes o grupos. Usá flechas para marcar la dirección del interés o la tensión.
-</p>
-<ul>
-  <li>— Líneas continuas: Vínculos estables</li>
-  <li>- - Líneas punteadas: Vínculos distantes o inciertos</li>
-  <li>~~~ Líneas en zigzag: Vínculos de conflicto o choque</li>
-</ul>
-
-<div class="sociograma">
-  <svg viewBox="0 0 300 300">
-    <circle cx="150" cy="150" r="140" fill="none" stroke="#d8a1c4" stroke-width="2" />
-    <text x="150" y="150" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#a0587a">
-      (nombre)
-    </text>
-  </svg>
-</div>
-
+        <!-- 3. Presencia Física -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="eye" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">3. Presencia Física</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Rasgo Físico Distintivo</label><input type="text" id="rasgoFisico" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">El "Delatador"</label><input type="text" id="delatador" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Estilo de Movimiento</label><input type="text" id="movimiento" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Objetos con carga emocional</label><input type="text" id="objetos" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                </div>
+                <div><label class="block text-sm font-semibold text-slate-700 mb-1">Firma Sensorial (Olor, tacto, sonido)</label><input type="text" id="sensorial" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+            </div>
         </section>
-        <section id="dinamicas" class="contenido-tab">
-          <!-- Bloque Dinámicas y arco -->
-          <h2>4. Dinámicas de Grupo</h2>
 
-<label>El Vínculo de Anclaje</label>
-<textarea placeholder="¿Quién es la única persona que logra calmar al personaje? ¿Quién es para él esa persona?"></textarea>
-
-<label>¿A quién busca cuando tiene un problema práctico?</label>
-<textarea placeholder="Ej: Dinero, ayuda física, resolver situaciones concretas..."></textarea>
-
-<label>¿A quién busca cuando tiene un problema emocional?</label>
-<textarea></textarea>
-
-<label>¿A quién protege el personaje?</label>
-<textarea></textarea>
-
-<label>El Vínculo de Tensión</label>
-<textarea placeholder="¿A quién detesta? ¿Qué parte de sí mismo ve reflejada en esa persona?"></textarea>
-
-<label>¿Cuál es su mayor 'obstáculo' social?</label>
-<textarea></textarea>
-
-<label>¿Qué es lo que más envidia de otro personaje?</label>
-<textarea></textarea>
-
-<label>El Vínculo Espejo</label>
-<textarea placeholder="¿Qué otro personaje representa lo que el protagonista podría haber sido si tomaba otras decisiones?"></textarea>
-
-<h2>5. Pez dentro y fuera del agua</h2>
-
-<label>¿En qué grupo se siente más cómodo y por qué?</label>
-<textarea></textarea>
-
-<label>¿En qué entorno social no encaja? ¿Qué siente?</label>
-<textarea placeholder="Ej: Vergüenza, enojo, tristeza, inseguridad..."></textarea>
-
-<h2>El Arco de Transformación</h2>
-<p class="instruccion">Cómo planeas que cambie el personaje desde el inicio al fin.</p>
-
-<label>Punto A (Inicio)</label>
-<textarea placeholder="¿En qué estado emocional y social arranca?"></textarea>
-
-<label>El Detonante</label>
-<textarea placeholder="¿Qué evento lo obliga a cambiar?"></textarea>
-
-<label>El Sacrificio</label>
-<textarea placeholder="¿Qué tiene que perder o dejar atrás para alcanzar su objetivo?"></textarea>
-
-<label>Punto B (Final)</label>
-<textarea placeholder="¿Cómo es su nueva visión del mundo tras la historia?"></textarea>
-
+        <!-- 4. Voz y Comportamiento -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="message-square" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">4. Voz y Comportamiento</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Tono de voz y ritmo</label><input type="text" id="tono" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Muletilla recurrente</label><input type="text" id="muletilla" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Actitud ante autoridad</label><input type="text" id="autoridad" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Sentido del humor</label><input type="text" id="humor" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                    <label class="block text-sm font-semibold text-slate-700 mb-3">Dos frases típicas:</label>
+                    <input type="text" id="frase1" placeholder="1..." class="data-input w-full p-2 bg-white border border-slate-200 rounded-md text-sm italic mb-2">
+                    <input type="text" id="frase2" placeholder="2..." class="data-input w-full p-2 bg-white border border-slate-200 rounded-md text-sm italic">
+                </div>
+            </div>
         </section>
-      </main>
-    </div>
-  </div>
-  <script src="script.js"></script>
+
+        <!-- 5. Mapa Social -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="map" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">5. El Mapa Social</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <h3 class="text-md font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Círculos de Pertenencia</h3>
+                <div class="space-y-4 mb-6">
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Familia</label><input type="text" id="familia" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Círculo Íntimo</label><input type="text" id="circuloIntimo" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Círculo Funcional</label><input type="text" id="circuloFuncional" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    </div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Círculo de Interés</label><input type="text" id="circuloInteres" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Círculos Periféricos</label><input type="text" id="circuloExtrano" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                </div>
+                <h3 class="text-md font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Estatus y Poder</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Imagen Pública</label><input type="text" id="imagenPublica" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Autoimagen</label><input type="text" id="autoimagen" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                </div>
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-sm font-semibold text-slate-700">Nivel de Influencia</label>
+                        <span id="influencia-val" class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">5/10</span>
+                    </div>
+                    <input type="range" id="influencia" min="1" max="10" value="5" class="slider-thumb w-full h-2 bg-slate-200 rounded-lg appearance-none">
+                </div>
+                <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Insider o Outsider?</label><input type="text" id="insiderOutsider" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+            </div>
+        </section>
+
+        <!-- 6. Sociograma -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">6. Sociograma (Vínculos)</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
+                    <p class="text-sm text-slate-500 mb-4">Añade personajes y define el tipo de vínculo para visualizarlo.</p>
+                    
+                    <!-- Controls -->
+                    <div class="flex flex-col sm:flex-row gap-3 mb-6 no-print">
+                        <input type="text" id="rel-name" placeholder="Nombre del otro personaje" class="flex-1 p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <select id="rel-type" class="p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="stable">Estable (─)</option>
+                            <option value="distant">Distante (---)</option>
+                            <option value="conflict">Conflicto (~~~)</option>
+                        </select>
+                        <button onclick="app.addRelation()" class="p-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Visual Graph -->
+                    <div id="sociogram-container" class="flex flex-wrap justify-center gap-8 py-8 min-h-[200px] items-center relative">
+                        <!-- Content generated by JS -->
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="mt-4 flex gap-4 justify-center text-xs text-slate-400 border-t border-slate-200 pt-4">
+                        <div class="flex items-center gap-2"><div class="w-8 h-0 border-t-2 border-slate-400 border-solid"></div> Estable</div>
+                        <div class="flex items-center gap-2"><div class="w-8 h-0 border-t-2 border-slate-400 border-dashed"></div> Distante</div>
+                        <div class="flex items-center gap-2"><div class="w-8 h-0 border-t-2 border-red-400 border-dotted"></div> Conflicto</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Dinámicas -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="brain" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">7. Dinámicas y Entorno</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-indigo-900 text-sm uppercase tracking-wide">Vínculos Clave</h3>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Anclaje (Calma)</label><input type="text" id="anclaje" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Ayuda Práctica</label><input type="text" id="ayudaPractica" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Ayuda Emocional</label><input type="text" id="ayudaEmocional" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Protegido</label><input type="text" id="protegido" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-red-900 text-sm uppercase tracking-wide">Tensiones y Espejos</h3>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Tensión (Odio)</label><input type="text" id="tension" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Obstáculo Social</label><input type="text" id="obstaculo" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Envidia</label><input type="text" id="envidia" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Vínculo Espejo</label><input type="text" id="espejo" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    </div>
+                </div>
+                <div class="mt-8 pt-6 border-t border-slate-100">
+                    <h3 class="font-bold text-slate-800 text-md mb-4">Pez dentro y fuera del agua</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div class="p-4 bg-green-50 rounded-lg border border-green-100">
+                          <label class="block text-sm font-semibold text-slate-700 mb-1">Zona de Confort</label>
+                          <textarea id="pezDentro" class="data-input w-full p-3 bg-white border border-green-200 rounded-lg"></textarea>
+                       </div>
+                       <div class="p-4 bg-orange-50 rounded-lg border border-orange-100">
+                          <label class="block text-sm font-semibold text-slate-700 mb-1">Zona de Discomfort</label>
+                          <textarea id="pezFuera" class="data-input w-full p-3 bg-white border border-orange-200 rounded-lg"></textarea>
+                       </div>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- 8. Arco -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-indigo-200 overflow-hidden print-break-inside">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">8. Arco de Transformación</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <div class="relative">
+                    <div class="absolute left-4 top-4 bottom-4 w-1 bg-gradient-to-b from-indigo-200 via-purple-200 to-emerald-200 rounded-full hidden md:block"></div>
+                    <div class="space-y-6 md:pl-12 relative">
+                        <!-- Puntos del arco -->
+                        <div class="relative">
+                            <div class="absolute -left-12 top-2 w-8 h-8 bg-indigo-100 rounded-full border-4 border-white shadow-sm flex items-center justify-center text-indigo-600 font-bold text-xs hidden md:flex">A</div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Punto A (Inicio)</label>
+                            <textarea id="puntoA" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></textarea>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-12 top-2 w-8 h-8 bg-purple-100 rounded-full border-4 border-white shadow-sm flex items-center justify-center text-purple-600 hidden md:flex"><i data-lucide="zap" class="w-3 h-3"></i></div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">El Detonante</label>
+                            <input type="text" id="detonante" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-12 top-2 w-8 h-8 bg-red-100 rounded-full border-4 border-white shadow-sm flex items-center justify-center text-red-600 hidden md:flex"><i data-lucide="anchor" class="w-3 h-3"></i></div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Sacrificio</label>
+                            <input type="text" id="sacrificio" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-12 top-2 w-8 h-8 bg-emerald-100 rounded-full border-4 border-white shadow-sm flex items-center justify-center text-emerald-600 font-bold text-xs hidden md:flex">B</div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Punto B (Final)</label>
+                            <textarea id="puntoB" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-slate-400 text-sm mt-12 mb-6 no-print">
+            <p>Basado en la guía de "Construcción del Personaje"</p>
+            <p class="mt-2 text-xs">Los datos se guardan automáticamente en este dispositivo.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- LOGIC ---
+        const app = {
+            state: {
+                // Estado inicial
+                nombre: "", apodos: "", edad: "", ocupacion: "", rol: "", arquetipo: "", concepto: "", contradiccion: "",
+                herida: "", mentira: "", deseo: "", necesidad: "", lineaRoja: "",
+                rasgoFisico: "", delatador: "", movimiento: "", objetos: "", sensorial: "",
+                tono: "", muletilla: "", autoridad: "", humor: "", frase1: "", frase2: "",
+                familia: "", circuloIntimo: "", circuloFuncional: "", circuloInteres: "", circuloExtrano: "",
+                imagenPublica: "", autoimagen: "", influencia: 5, insiderOutsider: "",
+                relaciones: [],
+                anclaje: "", ayudaPractica: "", ayudaEmocional: "", protegido: "", tension: "", obstaculo: "", envidia: "", espejo: "",
+                pezDentro: "", pezFuera: "",
+                puntoA: "", detonante: "", sacrificio: "", puntoB: ""
+            },
+
+            init() {
+                this.loadData();
+                this.setupListeners();
+                this.renderSociogram();
+                this.updateProgress();
+                lucide.createIcons();
+                
+                // Open first section by default
+                document.querySelector('.section-content').classList.remove('hidden');
+                document.querySelector('.section-icon').style.transform = 'rotate(180deg)';
+            },
+
+            loadData() {
+                const saved = localStorage.getItem('charArchJS');
+                if (saved) {
+                    try {
+                        this.state = { ...this.state, ...JSON.parse(saved) };
+                        // Populate Inputs
+                        Object.keys(this.state).forEach(key => {
+                            if (key === 'relaciones') return;
+                            const el = document.getElementById(key);
+                            if (el) el.value = this.state[key];
+                        });
+                        // Specific handler for slider text update
+                        document.getElementById('influencia-val').innerText = `${this.state.influencia}/10`;
+                    } catch (e) { console.error("Error loading data", e); }
+                }
+            },
+
+            saveData() {
+                localStorage.setItem('charArchJS', JSON.stringify(this.state));
+                this.updateProgress();
+            },
+
+            setupListeners() {
+                // Inputs de texto y slider
+                document.querySelectorAll('.data-input, .slider-thumb').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        this.state[e.target.id] = e.target.value;
+                        if (e.target.id === 'influencia') {
+                            document.getElementById('influencia-val').innerText = `${e.target.value}/10`;
+                        }
+                        this.saveData();
+                    });
+                });
+
+                // Acordeón (Collapsibles)
+                document.querySelectorAll('.section-toggle').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const content = btn.nextElementSibling;
+                        const icon = btn.querySelector('.section-icon');
+                        content.classList.toggle('hidden');
+                        icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+                        if (!content.classList.contains('hidden')) content.classList.add('fade-in');
+                    });
+                });
+            },
+
+            addRelation() {
+                const nameEl = document.getElementById('rel-name');
+                const typeEl = document.getElementById('rel-type');
+                
+                if (!nameEl.value) return;
+
+                this.state.relaciones.push({
+                    id: Date.now(),
+                    name: nameEl.value,
+                    type: typeEl.value
+                });
+
+                nameEl.value = "";
+                this.saveData();
+                this.renderSociogram();
+            },
+
+            removeRelation(id) {
+                this.state.relaciones = this.state.relaciones.filter(r => r.id !== id);
+                this.saveData();
+                this.renderSociogram();
+            },
+
+            renderSociogram() {
+                const container = document.getElementById('sociogram-container');
+                const mainName = this.state.nombre || "TU PERSONAJE";
+                
+                if (this.state.relaciones.length === 0) {
+                    container.innerHTML = `
+                        <div class="relative z-10 w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center text-center p-2 shadow-lg ring-4 ring-indigo-100">
+                            <span class="font-bold text-white text-sm line-clamp-3">${mainName}</span>
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
+                            <p class="text-slate-400 font-medium">Añade vínculos para verlos aquí</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                    <div class="relative z-10 w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center text-center p-2 shadow-lg ring-4 ring-indigo-100">
+                        <span class="font-bold text-white text-sm line-clamp-3">${mainName}</span>
+                    </div>
+                `;
+
+                this.state.relaciones.forEach(rel => {
+                    let lineClass = "";
+                    let ringClass = "";
+                    let label = "";
+                    let labelColor = "";
+
+                    if (rel.type === "stable") {
+                        lineClass = "border-solid border-slate-400";
+                        ringClass = "border-slate-400";
+                        label = "Estable";
+                        labelColor = "text-slate-400";
+                    } else if (rel.type === "distant") {
+                        lineClass = "border-dashed border-slate-400";
+                        ringClass = "border-slate-400";
+                        label = "Distante";
+                        labelColor = "text-slate-400";
+                    } else {
+                        lineClass = "border-dotted border-red-400";
+                        ringClass = "border-red-400";
+                        label = "Conflicto";
+                        labelColor = "text-red-500";
+                    }
+
+                    html += `
+                        <div class="relative group flex flex-col items-center gap-2 fade-in">
+                            <div class="h-8 w-0 border-l-2 ${lineClass} absolute -top-8 left-1/2 -translate-x-1/2"></div>
+                            <div class="w-24 h-24 bg-white rounded-full border-2 ${ringClass} flex items-center justify-center text-center p-2 shadow-sm relative">
+                                <span class="text-xs font-semibold text-slate-700 leading-tight">${rel.name}</span>
+                                <button onclick="app.removeRelation(${rel.id})" class="absolute -top-1 -right-1 bg-red-100 text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity no-print">
+                                    <i data-lucide="minus" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                            <span class="text-[10px] uppercase font-bold tracking-wider ${labelColor}">${label}</span>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+                lucide.createIcons(); // Refresh icons for new elements
+            },
+
+            updateProgress() {
+                const totalKeys = Object.keys(this.state).length;
+                const filledKeys = Object.values(this.state).filter(v => {
+                    if (Array.isArray(v)) return v.length > 0;
+                    return v !== "" && v !== 5;
+                }).length;
+                
+                const percent = (filledKeys / totalKeys) * 100;
+                document.getElementById('progress-bar').style.width = `${percent}%`;
+            },
+
+            clearData() {
+                if (confirm("¿Estás seguro de borrar todo?")) {
+                    this.state = { 
+                        nombre: "", apodos: "", edad: "", ocupacion: "", rol: "", arquetipo: "", concepto: "", contradiccion: "",
+                        herida: "", mentira: "", deseo: "", necesidad: "", lineaRoja: "",
+                        rasgoFisico: "", delatador: "", movimiento: "", objetos: "", sensorial: "",
+                        tono: "", muletilla: "", autoridad: "", humor: "", frase1: "", frase2: "",
+                        familia: "", circuloIntimo: "", circuloFuncional: "", circuloInteres: "", circuloExtrano: "",
+                        imagenPublica: "", autoimagen: "", influencia: 5, insiderOutsider: "",
+                        relaciones: [],
+                        anclaje: "", ayudaPractica: "", ayudaEmocional: "", protegido: "", tension: "", obstaculo: "", envidia: "", espejo: "",
+                        pezDentro: "", pezFuera: "",
+                        puntoA: "", detonante: "", sacrificio: "", puntoB: ""
+                    };
+                    this.saveData();
+                    location.reload(); // Simple reload to clear inputs visually
+                }
+            }
+        };
+
+        // Start
+        window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
 </body>
 </html>
