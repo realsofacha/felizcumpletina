@@ -4,16 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arquitectura del Personaje</title>
-    <!-- Tailwind CSS -->
+    
+    <!-- LIBRERÍAS EXTERNAS (Se conectan a internet) -->
+    <!-- Tailwind CSS: Para el diseño rápido -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
+    <!-- Lucide Icons: Para los iconos -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Google Fonts -->
+    <!-- Fuentes de Google -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-    </head>
+    
+    <!-- CONEXIÓN CON TUS ARCHIVOS LOCALES -->
+    <!-- Aquí conectamos el archivo de estilos que creamos antes -->
+    <link rel="stylesheet" href="styles.css">
+</head>
 <body class="bg-slate-100 text-slate-800 pb-20">
 
-    <!-- Header -->
+    <!-- ENCABEZADO (HEADER) -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-20 no-print shadow-sm">
         <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -38,9 +44,10 @@
         </div>
     </header>
 
+    <!-- CONTENIDO PRINCIPAL -->
     <main class="max-w-4xl mx-auto p-6">
         
-        <!-- Intro Card -->
+        <!-- TARJETA DE INTRODUCCIÓN -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 flex flex-col md:flex-row gap-6 items-center print:border-none print:shadow-none print:mb-0">
             <div class="flex-1 w-full">
                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre Completo</label>
@@ -59,7 +66,7 @@
             </div>
         </div>
 
-        <!-- 1. Identidad y Concepto -->
+        <!-- SECCIÓN 1: Identidad y Concepto -->
         <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
             <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
                 <div class="flex items-center gap-3">
@@ -106,7 +113,7 @@
             </div>
         </section>
 
-        <!-- 2. Motor Interno -->
+        <!-- SECCIÓN 2: Motor Interno -->
         <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
             <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
                 <div class="flex items-center gap-3">
@@ -147,7 +154,7 @@
             </div>
         </section>
 
-        <!-- 3. Presencia Física -->
+        <!-- SECCIÓN 3: Presencia Física -->
         <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
             <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
                 <div class="flex items-center gap-3">
@@ -190,7 +197,7 @@
             </div>
         </section>
 
-        <!-- 4. Voz y Comportamiento -->
+        <!-- SECCIÓN 4: Voz y Comportamiento -->
         <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
             <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
                 <div class="flex items-center gap-3">
@@ -231,7 +238,7 @@
             </div>
         </section>
 
-        <!-- 5. Mapa Social -->
+        <!-- SECCIÓN 5: Mapa Social -->
         <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
             <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
                 <div class="flex items-center gap-3">
@@ -307,7 +314,7 @@
             </div>
         </section>
 
-        <!-- 6. Sociograma -->
+        <!-- SECCIÓN 6: Sociograma -->
         <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
             <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
                 <div class="flex items-center gap-3">
@@ -322,7 +329,7 @@
                 </p>
                 <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
                     
-                    <!-- Controls -->
+                    <!-- Controles para agregar personajes -->
                     <div class="flex flex-col sm:flex-row gap-3 mb-6 no-print">
                         <input type="text" id="rel-name" placeholder="Nombre del otro personaje" class="flex-1 p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                         <select id="rel-type" class="p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -335,12 +342,12 @@
                         </button>
                     </div>
 
-                    <!-- Visual Graph -->
+                    <!-- El gráfico se generará aquí -->
                     <div id="sociogram-container" class="flex flex-wrap justify-center gap-8 py-8 min-h-[200px] items-center relative">
-                        <!-- Content generated by JS -->
+                        <!-- El contenido lo inserta Javascript -->
                     </div>
 
-                    <!-- Legend -->
+                    <!-- Leyenda -->
                     <div class="mt-4 flex gap-4 justify-center text-xs text-slate-400 border-t border-slate-200 pt-4">
                         <div class="flex items-center gap-2"><div class="w-8 h-0 border-t-2 border-slate-400 border-solid"></div> Estable</div>
                         <div class="flex items-center gap-2"><div class="w-8 h-0 border-t-2 border-slate-400 border-dashed"></div> Distante</div>
@@ -350,7 +357,7 @@
             </div>
         </section>
 
-        <!-- 7. Dinámicas -->
+        <!-- SECCIÓN 7: Dinámicas -->
         <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden print-break-inside">
             <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
                 <div class="flex items-center gap-3">
@@ -425,7 +432,7 @@
             </div>
         </section>
 
-        <!-- 8. Arco -->
+        <!-- SECCIÓN 8: Arco -->
         <section class="mb-6 bg-white rounded-xl shadow-sm border border-indigo-200 overflow-hidden print-break-inside">
             <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
                 <div class="flex items-center gap-3">
@@ -471,11 +478,16 @@
             </div>
         </section>
 
+        <!-- FOOTER -->
         <footer class="text-center text-slate-400 text-sm mt-12 mb-6 no-print">
             <p>Basado en la guía de "Construcción del Personaje"</p>
             <p class="mt-2 text-xs">Los datos se guardan automáticamente en este dispositivo.</p>
         </footer>
 
     </main>
-    </body>
+    
+    <!-- CONEXIÓN CON TU ARCHIVO DE LÓGICA -->
+    <!-- Aquí conectamos el archivo javascript que creamos antes -->
+    <script src="script.js"></script>
+</body>
 </html>
