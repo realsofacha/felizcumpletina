@@ -5,192 +5,422 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Construcción del Personaje</title>
   <style>
-    @media print {
-      .print-button {
-        display: none;
-      }
-    }
-
+    /* Tipografía y base */
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #fef9fc;
       color: #3d1f2f;
       margin: 0;
-      padding: 0;
     }
 
-    .app {
-      padding: 2cm 1cm 2cm 3cm; /* margen izquierdo para perforaciones */
-      background-color: #fff0f5;
+    .cuaderno {
+      width: 21cm;
+      margin: auto;
+      padding: 2cm 2cm 2cm 3cm; /* margen izq para carpeta */
+      background-color: #fff;
     }
 
-    .character-form {
-      background-color: #fff7fb;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 5px rgba(124, 76, 87, 0.1);
-      border-left: 10px solid #d8a1c4;
-    }
-
-    .character-form h1 {
-      text-align: center;
-      font-size: 2rem;
-      color: #9d6480;
+    header.header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e3cce4;
       margin-bottom: 1rem;
     }
 
-    .character-form h2 {
-      color: #b57697;
-      font-size: 1.2rem;
-      margin-top: 1.5rem;
+    .titulo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
-    .character-form h3 {
-      color: #c193aa;
+    .titulo h1 {
+      margin: 0;
+      color: #6d375d;
+    }
+
+    .subtitulo {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #a38197;
+    }
+
+    .acciones button {
+      margin-left: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .guardar-btn {
+      background-color: #f3d9eb;
+      color: #5a2944;
+    }
+
+    .imprimir-btn {
+      background-color: #d8a1c4;
+      color: white;
+    }
+
+    nav.tabs {
+      display: flex;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #eee;
+    }
+
+    .tab {
+      background: none;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-weight: bold;
+      color: #79596b;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab.active {
+      border-bottom: 3px solid #d8a1c4;
+      color: #4e2c3b;
+    }
+
+    section.contenido-tab {
+      display: none;
+    }
+
+    section.contenido-tab.activo {
+      display: block;
+    }
+
+    h2 {
+      color: #833d63;
+      border-bottom: 1px solid #eccce2;
+      padding-bottom: 0.2rem;
+      margin-top: 2rem;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
       margin-top: 1rem;
     }
 
-    .character-form ul {
-      list-style: none;
-      padding-left: 0;
-    }
-
-    .character-form li {
-      margin: 0.4rem 0;
-      padding: 0.3rem;
-      border-bottom: 1px dashed #d9a8c1;
-    }
-
-    .print-button {
-      margin: 1rem;
-      padding: 0.5rem 1rem;
-      background-color: #eac6dc;
-      color: #5c2b42;
-      border: none;
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #d8a1c4;
       border-radius: 5px;
-      cursor: pointer;
+      background-color: #fff7fb;
+    }
+
+    textarea {
+      min-height: 60px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .checkbox-item input {
+      margin-right: 0.5rem;
+    }
+
+    .sociograma {
+      display: flex;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .sociograma svg {
+      width: 300px;
+      height: 300px;
+    }
+
+    @media print {
+      .guardar-btn, .imprimir-btn, .tabs {
+        display: none;
+      }
+      .cuaderno {
+        width: auto;
+        margin: 0;
+        padding: 1cm 1cm 1cm 2.5cm;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <button class="print-button" onclick="window.print()">Imprimir</button>
-    <div class="character-form">
-      <h1>Construcción del Personaje</h1>
+  <div class="cuaderno">
+    <header class="header">
+      <div class="titulo">
+        <div class="icono-libro">📘</div>
+        <div>
+          <h1>Construcción del Personaje</h1>
+          <p class="subtitulo">Cuaderno de Escritura</p>
+        </div>
+      </div>
+      <div class="acciones">
+        <button onclick="guardar()" class="guardar-btn">Guardar</button>
+        <button onclick="window.print()" class="imprimir-btn">Imprimir</button>
+      </div>
+    </header>
 
-      <section>
+    <nav class="tabs">
+      <button class="tab active" onclick="mostrarSeccion('identidad')">🧠 Identidad & Motor</button>
+      <button class="tab" onclick="mostrarSeccion('presencia')">👁️ Presencia & Voz</button>
+      <button class="tab" onclick="mostrarSeccion('mapa')">🧩 Mapa Social</button>
+      <button class="tab" onclick="mostrarSeccion('dinamicas')">🔗 Dinámicas & Arco</button>
+    </nav>
+
+    <main>
+      <section id="identidad" class="contenido-tab activo">
+        <!-- CONTENIDO DEL BLOQUE 2 (IDENTIDAD Y MOTOR) -->
         <h2>Identidad y Concepto</h2>
-        <ul>
-          <li>Nombre completo:</li>
-          <li>Apodo/s y quién se los dice:</li>
-          <li>Edad y fecha de nacimiento:</li>
-          <li>Ocupación / Oficio:</li>
-          <li>Rol en la trama:</li>
-          <li>Arquetipo en una palabra:</li>
-          <li>Concepto central:</li>
-          <li>Contradicción principal:</li>
-        </ul>
-      </section>
+        <p><em>El objetivo es fijar la imagen mental del personaje y su lugar en la obra.</em></p>
 
-      <section>
+        <label>Nombre completo</label>
+        <input type="text" />
+
+        <label>Apodo/s y quién se los dice</label>
+        <input type="text" />
+
+        <label>Edad</label>
+        <input type="number" />
+
+        <label>Fecha de nacimiento</label>
+        <input type="text" placeholder="DD / MM / AAAA" />
+
+        <label>Ocupación / Oficio</label>
+        <input type="text" />
+
+        <label>Rol en la trama</label>
+        <select>
+          <option>Protagonista</option>
+          <option>Antagonista</option>
+          <option>Aliado</option>
+          <option>Secundario</option>
+          <option>Otro</option>
+        </select>
+
+        <label>Arquetipo en una palabra</label>
+        <input type="text" placeholder="Ej: El rebelde, la cuidadora, el cínico..." />
+
+        <label>Concepto central</label>
+        <textarea placeholder='Es un/a [adjetivo] que quiere [objetivo] pero se enfrenta a [obstáculo]'></textarea>
+
+        <label>Contradicción principal</label>
+        <textarea placeholder="Ej: Es un soldado valiente que le teme a la oscuridad"></textarea>
+
         <h2>El Motor Interno</h2>
-        <ul>
-          <li>La Herida (El Fantasma):</li>
-          <li>La Mentira que se cuenta:</li>
-          <li>Lo que CREE que quiere (Deseo):</li>
-          <li>Lo que REALMENTE necesita (Necesidad):</li>
-          <li>Línea roja:</li>
-        </ul>
+        <p><em>Esto es lo que define sus decisiones.</em></p>
+
+        <label>La Herida (El Fantasma)</label>
+        <textarea placeholder="Evento del pasado que todavía le duele o condiciona sus acciones"></textarea>
+
+        <label>La mentira que se cuenta</label>
+        <textarea placeholder='Ej: "No necesito a nadie", "El mundo es un lugar donde solo gana el más fuerte"'></textarea>
+
+        <label>Lo que CREE que quiere (Deseo)</label>
+        <textarea></textarea>
+
+        <label>Lo que REALMENTE necesita (Necesidad)</label>
+        <textarea></textarea>
+
+        <label>Línea roja</label>
+        <textarea placeholder="¿Qué es lo que este personaje juró que NUNCA haría?"></textarea>
       </section>
 
-      <section>
+      <section id="presencia" class="contenido-tab">
         <h2>Presencia Física</h2>
-        <ul>
-          <li>Rasgo físico distintivo:</li>
-          <li>El "Delatador":</li>
-          <li>Estilo de movimiento:</li>
-          <li>Objetos con carga emocional:</li>
-          <li>Firma sensorial:</li>
-        </ul>
-      </section>
+        <p><em>Cómo el lector lo percibe en la página.</em></p>
 
-      <section>
+        <label>Rasgo físico distintivo</label>
+        <input type="text" placeholder="Eso que el narrador mencionará más de una vez" />
+
+        <label>El "Delatador"</label>
+        <input type="text" placeholder="Ej: Un gesto inconsciente que hace cuando miente o está nervioso" />
+
+        <label>Estilo de movimiento</label>
+        <textarea placeholder="¿Es torpe, elegante, ocupa mucho espacio, se encoge?"></textarea>
+
+        <label>Objetos con carga emocional</label>
+        <textarea placeholder="Ej: Algo que siempre lleva encima y por qué"></textarea>
+
+        <label>Firma sensorial</label>
+        <textarea placeholder="¿A qué huele? ¿Cómo es su tacto? ¿Qué sonido hace al llegar?"></textarea>
+
         <h2>Voz y Comportamiento Social</h2>
-        <ul>
-          <li>Tono de voz y ritmo:</li>
-          <li>Muletilla o palabra recurrente:</li>
-          <li>Actitud frente a la autoridad:</li>
-          <li>Sentido del humor:</li>
-          <li>Dos frases típicas que diría:</li>
-        </ul>
+        <p><em>Para que el diálogo sea único y no suene igual al de otros personajes.</em></p>
+
+        <label>Tono de voz y ritmo</label>
+        <textarea placeholder="Ej: Habla rápido, susurra, es gritón, usa palabras cultas..."></textarea>
+
+        <label>Muletilla o palabra recurrente</label>
+        <input type="text" />
+
+        <label>Actitud frente a la autoridad</label>
+        <textarea></textarea>
+
+        <label>Sentido del humor</label>
+        <select>
+          <option>Irónico</option>
+          <option>Nulo</option>
+          <option>Infantil</option>
+          <option>Negro</option>
+          <option>Otro</option>
+        </select>
+
+        <label>Dos frases típicas que diría</label>
+        <input type="text" placeholder="Frase 1" />
+        <input type="text" placeholder="Frase 2" />
       </section>
 
-      <section>
+      <section id="mapa" class="contenido-tab">
         <h2>El Mapa Social</h2>
+        <p><em>Ubicar al personaje en su red de contactos y entender su reputación.</em></p>
+
         <h3>1. Círculos de Pertenencia</h3>
-        <ul>
-          <li>Familia:</li>
-          <li>Círculo Íntimo:</li>
-          <li>Círculo Funcional:</li>
-          <li>Círculo de Interés:</li>
-          <li>Círculos "Extraños" o Periféricos:</li>
-        </ul>
+
+        <label>Familia</label>
+        <textarea placeholder="¿Es un núcleo sólido, roto, ausente, tóxico?"></textarea>
+
+        <label>Círculo Íntimo</label>
+        <textarea placeholder="Amigos, pareja, o aliados en los que confía"></textarea>
+
+        <label>Círculo Funcional</label>
+        <textarea placeholder="Colegas, jefes, subordinados"></textarea>
+
+        <label>Círculo de Interés (Ideología / Hobbies)</label>
+        <textarea placeholder="Clubes, religión, militancia, grupos de ocio"></textarea>
+
+        <label>Círculos 'Extraños' o Periféricos</label>
+        <textarea placeholder="Grupos con los que se cruza pero no encaja (ej: clase social, bajo mundo, etc.)"></textarea>
+
         <h3>2. Estatus y Poder Social</h3>
+
+        <label>¿Cómo lo ve el mundo? (Imagen pública)</label>
+        <input type="text" placeholder="Ej: El que resuelve problemas, el bufón del grupo..." />
+
+        <label>¿Cómo se ve él mismo dentro de la sociedad?</label>
+        <input type="text" placeholder="Ej: Un impostor, un líder incomprendido..." />
+
+        <label>Nivel de influencia</label>
+        <div class="checkbox-group">
+          <span class="checkbox-item"><input type="radio" name="influencia" value="1" /> 1</span>
+          <span class="checkbox-item"><input type="radio" name="influencia" value="2" /> 2</span>
+          <span class="checkbox-item"><input type="radio" name="influencia" value="3" /> 3</span>
+          <span class="checkbox-item"><input type="radio" name="influencia" value="4" /> 4</span>
+          <span class="checkbox-item"><input type="radio" name="influencia" value="5" /> 5</span>
+          <span class="checkbox-item"><input type="radio" name="influencia" value="6" /> 6</span>
+          <span class="checkbox-item"><input type="radio" name="influencia" value="7" /> 7</span>
+          <span class="checkbox-item"><input type="radio" name="influencia" value="8" /> 8</span>
+          <span class="checkbox-item"><input type="radio" name="influencia" value="9" /> 9</span>
+          <span class="checkbox-item"><input type="radio" name="influencia" value="10" /> 10</span>
+        </div>
+
+        <label>¿Es un Insider o un Outsider?</label>
+        <select>
+          <option>Insider</option>
+          <option>Outsider</option>
+          <option>No definido</option>
+        </select>
+
+        <h3>3. Sociograma (Esquema Visual)</h3>
+        <p>En el centro del círculo va el nombre de tu personaje. Alrededor, escribí los nombres de los otros personajes o grupos. Usá flechas para marcar dirección del interés o tensión.</p>
         <ul>
-          <li>¿Cómo lo ve el mundo (Imagen pública)?</li>
-          <li>¿Cómo se ve él mismo dentro de la sociedad?</li>
-          <li>Nivel de influencia: 1 — 2 — 3 — 4 — 5 — 6 — 7 — 8 — 9 — 10</li>
-          <li>¿Es un "Insider" o un "Outsider"?</li>
+          <li>— Líneas continuas: Vínculos estables</li>
+          <li>- - Líneas punteadas: Vínculos distantes o inciertos</li>
+          <li>~~~ Líneas en zigzag: Vínculos de conflicto o choque</li>
         </ul>
+
+        <div class="sociograma">
+          <svg viewBox="0 0 300 300">
+            <circle cx="150" cy="150" r="140" fill="none" stroke="#d8a1c4" stroke-width="2" />
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#a0587a" font-size="14px">
+              [Nombre del personaje]
+            </text>
+          </svg>
+        </div>
       </section>
 
-      <section>
-        <h2>El Sociograma (Esquema Visual)</h2>
-        <p>
-          En el centro del círculo va el nombre de tu personaje. Alrededor, escribís los nombres
-          de los otros personajes/grupos/factores. Usa flechas para marcar la dirección del interés
-          o la tensión.
-        </p>
-        <ul>
-          <li>Líneas continuas ( — ): Vínculos estables</li>
-          <li>Líneas punteadas ( - - ): Vínculos distantes o inciertos</li>
-          <li>Líneas en zigzag ( ~~~ ): Vínculos de conflicto o choque</li>
-        </ul>
-      </section>
+      <section id="dinamicas" class="contenido-tab">
+        <h2>4. Dinámicas de Grupo</h2>
 
-      <section>
-        <h2>Dinámicas de Grupo</h2>
-        <ul>
-          <li>El Vínculo de Anclaje: ¿Quién calma al personaje?</li>
-          <li>¿A quién busca para ayuda práctica?</li>
-          <li>¿A quién busca para ayuda emocional?</li>
-          <li>¿A quién protege el personaje?</li>
-          <li>El Vínculo de Tensión: ¿A quién detesta?</li>
-          <li>¿Qué parte de sí mismo ve reflejada en esa persona?</li>
-          <li>¿Cuál es su mayor obstáculo social?</li>
-          <li>¿Qué envidia de otro personaje?</li>
-          <li>El Vínculo Espejo: ¿Qué otro representa lo que pudo ser?</li>
-        </ul>
-      </section>
+        <label>El Vínculo de Anclaje</label>
+        <textarea placeholder="¿Quién es la única persona que logra calmar al personaje? ¿Quién es para él esa persona?"></textarea>
 
-      <section>
-        <h2>Pez dentro y fuera del agua</h2>
-        <ul>
-          <li>¿Dónde se siente más cómodo y por qué?</li>
-          <li>¿Dónde no encaja? ¿Qué siente?</li>
-        </ul>
-      </section>
+        <label>¿A quién busca cuando tiene un problema práctico?</label>
+        <textarea placeholder="Ej: Dinero, ayuda física, soluciones materiales..."></textarea>
 
-      <section>
+        <label>¿A quién busca cuando tiene un problema emocional?</label>
+        <textarea></textarea>
+
+        <label>¿A quién protege el personaje?</label>
+        <textarea></textarea>
+
+        <label>El Vínculo de Tensión</label>
+        <textarea placeholder="¿A quién detesta? ¿Qué parte de sí mismo ve reflejada en esa persona?"></textarea>
+
+        <label>¿Cuál es su mayor obstáculo social?</label>
+        <textarea></textarea>
+
+        <label>¿Qué es lo que más envidia de otro personaje?</label>
+        <textarea></textarea>
+
+        <label>El Vínculo Espejo</label>
+        <textarea placeholder="¿Qué personaje representa lo que él pudo haber sido si hubiera tomado otras decisiones?"></textarea>
+
+        <h2>5. Pez dentro y fuera del agua</h2>
+
+        <label>¿En qué grupo se siente más cómodo y por qué?</label>
+        <textarea></textarea>
+
+        <label>¿En qué entorno social no encaja? ¿Qué siente?</label>
+        <textarea placeholder="Ej: Vergüenza, enojo, tristeza..."></textarea>
+
         <h2>El Arco de Transformación</h2>
-        <ul>
-          <li>Punto A (Inicio):</li>
-          <li>El Detonante:</li>
-          <li>El Sacrificio:</li>
-          <li>Punto B (Final):</li>
-        </ul>
+        <p><em>Cómo planeas que cambie el personaje desde el inicio al fin.</em></p>
+
+        <label>Punto A (Inicio)</label>
+        <textarea placeholder="¿En qué estado emocional y social arranca?"></textarea>
+
+        <label>El Detonante</label>
+        <textarea placeholder="¿Qué evento lo obliga a cambiar?"></textarea>
+
+        <label>El Sacrificio</label>
+        <textarea placeholder="¿Qué tiene que perder o dejar atrás para ganar su objetivo?"></textarea>
+
+        <label>Punto B (Final)</label>
+        <textarea placeholder="¿Cómo es su nueva visión del mundo tras la historia?"></textarea>
       </section>
-    </div>
-  </div>
+    </main>
+  <script>
+    function mostrarSeccion(id) {
+      const secciones = document.querySelectorAll('.contenido-tab');
+      secciones.forEach(s => s.classList.remove('activo'));
+
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(t => t.classList.remove('active'));
+
+      document.getElementById(id).classList.add('activo');
+      document.querySelector(`.tab[onclick*="${id}"]`).classList.add('active');
+    }
+
+    function guardar() {
+      alert('Función de guardado no implementada aún. Podrías usar CTRL+S para guardar como HTML o imprimir en PDF.');
+    }
+  </script>
 </body>
 </html>
