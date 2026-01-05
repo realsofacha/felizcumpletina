@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arquitectura del Personaje (Edición Impresa)</title>
     <style>
-        /* --- ESTILOS BASE (CSS PURO) --- */
+        /* --- ESTILOS BASE --- */
         :root {
             --primary: #4f46e5;
-            --primary-light: #eef2ff;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --border: #cbd5e1;
             --bg: #f1f5f9;
             --white: #ffffff;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         body {
@@ -42,7 +40,6 @@
         h1 { margin: 0; font-size: 1.4rem; color: #0f172a; }
         .subtitle { font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; }
 
-        /* BOTONES */
         .btn-group { display: flex; gap: 10px; }
         button {
             padding: 8px 16px;
@@ -54,20 +51,17 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            transition: all 0.2s;
         }
         button:hover { background: #f8fafc; }
         button.primary { background: var(--primary); color: white; border-color: var(--primary); }
-        button.primary:hover { background: #4338ca; }
         button.danger { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
         
-        /* ESTRUCTURA */
         main { max-width: 900px; margin: 30px auto; padding: 0 20px; }
         
         .card {
             background: var(--white);
             border-radius: 12px;
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             margin-bottom: 25px;
             overflow: hidden;
             border: 1px solid var(--border);
@@ -83,174 +77,161 @@
             cursor: pointer;
             user-select: none;
         }
-        .section-header:hover { background: #f1f5f9; }
         .section-title { font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
         .section-content { padding: 25px; display: none; }
         .section-content.open { display: block; }
 
-        /* FORMULARIOS */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
-
         .form-group { margin-bottom: 20px; }
         
-        label {
-            display: block;
-            font-weight: 700;
-            margin-bottom: 4px;
-            color: #334155;
-            font-size: 0.95rem;
-        }
+        label { display: block; font-weight: 700; margin-bottom: 4px; color: #334155; font-size: 0.95rem; }
+        .helper-text { font-size: 0.85rem; color: #64748b; margin-bottom: 8px; font-style: italic; }
 
-        .helper-text {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-bottom: 8px;
-            font-style: italic;
-            line-height: 1.3;
+        input[type="text"], textarea, select {
+            width: 100%; padding: 10px;
+            border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 1rem; font-family: inherit;
+            box-sizing: border-box; background: #fff;
         }
-
-        input[type="text"], textarea, select, input[type="range"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-family: inherit;
-            box-sizing: border-box;
-            background: #fff;
-        }
-        input:focus, textarea:focus { outline: 2px solid var(--primary); border-color: transparent; }
         
-        /* Intro Input Gigante */
         .hero-input {
-            font-size: 2rem;
-            border: none !important;
+            font-size: 2rem; border: none !important;
             border-bottom: 2px solid #e2e8f0 !important;
-            border-radius: 0;
-            padding: 5px 0;
-            background: transparent !important;
-            font-weight: 800;
-            color: #0f172a;
+            border-radius: 0; padding: 5px 0; background: transparent !important;
+            font-weight: 800; color: #0f172a;
         }
 
-        /* SOCIOGRAMA */
+        /* --- SOCIOGRAMA MEJORADO --- */
         .sociogram-box {
             border: 2px dashed #cbd5e1;
             border-radius: 8px;
             padding: 20px;
             background: #f8fafc;
-            min-height: 300px;
+            min-height: 400px; /* Más altura para evitar superposición */
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
+            overflow: hidden; /* Evitar scrollbars */
         }
-        .sociogram-controls { display: flex; gap: 10px; margin-bottom: 15px; }
         
         .node {
             position: absolute;
             background: white;
             border: 2px solid #64748b;
             border-radius: 50%;
-            width: 100px; height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: 0.8rem;
-            font-weight: bold;
+            width: 90px; height: 90px; /* Un poco más pequeños */
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; font-size: 0.75rem; font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 2;
-            padding: 5px;
-        }
-        .node.main {
-            background: var(--primary);
-            color: white;
-            border: none;
-            left: 50%; top: 50%;
-            transform: translate(-50%, -50%);
-            width: 120px; height: 120px;
-            font-size: 1rem;
             z-index: 10;
+            padding: 5px;
+            word-wrap: break-word;
         }
         
+        .node.main {
+            background: var(--primary); color: white; border: none;
+            width: 110px; height: 110px; font-size: 0.9rem;
+            z-index: 20;
+        }
+        
+        /* Líneas de conexión más robustas */
         .line {
             position: absolute;
+            top: 50%; left: 50%;
             transform-origin: 0 50%;
             z-index: 1;
+            height: 0;
         }
-        .line-stable { border-top: 2px solid #64748b; }
-        .line-distant { border-top: 2px dashed #64748b; }
+        
+        /* Estilos de línea específicos */
+        .line-stable { 
+            border-top: 2px solid #64748b; 
+        }
+        .line-distant { 
+            border-top: 2px dashed #64748b; 
+        }
         .line-conflict { 
-            background: repeating-linear-gradient(45deg, transparent, transparent 2px, #ef4444 2px, #ef4444 4px);
-            height: 4px;
+            border-top: 4px dotted #ef4444; /* Puntos gruesos para conflicto */
+        }
+
+        /* Texto sobre la línea */
+        .line-label {
+            position: absolute;
+            left: 50%; top: -15px;
+            transform: translateX(-50%);
+            font-size: 10px;
+            background: white;
+            padding: 0 4px;
+            color: #64748b;
+            text-transform: uppercase;
         }
 
         .delete-btn {
-            position: absolute;
-            top: -5px; right: -5px;
-            width: 24px; height: 24px;
-            background: #ef4444;
-            color: white;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer;
-            font-size: 14px;
-            border: 2px solid white;
+            position: absolute; top: -5px; right: -5px;
+            width: 20px; height: 20px; background: #ef4444; color: white;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; font-size: 12px; border: 2px solid white;
         }
         
-        /* MARCADORES DE AGUJEROS (Ocultos por defecto) */
         .hole-guide { display: none; }
 
-        /* --- IMPRESIÓN (PDF) --- */
+        /* --- IMPRESIÓN --- */
         @media print {
             @page {
                 size: A4;
-                margin: 0; /* Controlamos márgenes manualmente en el body */
+                margin: 0; 
             }
 
             body { 
-                background: white; 
-                color: black; 
-                font-size: 11pt;
-                /* Margen superior, derecho, inferior, IZQUIERDO (Extra para agujeros) */
-                margin: 15mm 15mm 15mm 25mm !important; 
+                background: white; color: black; font-size: 11pt;
+                /* Márgenes ajustados para equilibrio y agujeros */
+                margin: 15mm 20mm 15mm 30mm !important; 
             }
             
             /* Guías de perforación */
             .hole-guide {
                 display: block !important;
                 position: fixed;
-                left: 12mm; /* Ubicación estándar desde el borde */
-                width: 6mm;
-                height: 6mm;
-                border: 1px solid #aaa;
+                left: 12mm; /* En el margen izquierdo */
+                width: 6mm; height: 6mm;
+                border: 1px solid #999;
                 border-radius: 50%;
                 z-index: 9999;
-                /* Centrado vertical del orificio */
                 transform: translateY(-50%);
             }
 
             header, .sociogram-controls, button, footer { display: none !important; }
-            .card { box-shadow: none; border: none; padding: 0; margin-bottom: 30px; page-break-inside: avoid; }
-            .section-header { border-bottom: 2px solid black; padding-left: 0; pointer-events: none; }
-            .section-content { display: block !important; padding: 10px 0; }
+            .card { box-shadow: none; border: none; padding: 0; margin-bottom: 20px; page-break-inside: avoid; }
+            .section-header { border-bottom: 2px solid black; padding-left: 0; pointer-events: none; margin-bottom: 10px; }
+            .section-content { display: block !important; padding: 5px 0; }
             
             input, textarea, select { 
-                border: none; border-bottom: 1px solid #999; 
-                border-radius: 0; padding: 0; 
+                border: none; border-bottom: 1px solid #666; 
+                border-radius: 0; padding: 2px 0; 
                 font-family: 'Courier New', monospace; 
-                resize: none; 
-                min-height: 1.5em;
+                resize: none; min-height: 1.5em;
             }
-            .hero-input { border-bottom: 2px solid black !important; }
-            .helper-text { color: #444; font-size: 9pt; margin-top: 2px; }
+            .hero-input { border-bottom: 2px solid black !important; font-size: 24pt; margin-bottom: 10px; }
+            .helper-text { color: #444; font-size: 9pt; font-style: italic; }
             
-            .grid-2 { grid-template-columns: 1fr 1fr; gap: 30px; }
-            .sociogram-box { border: 1px solid #000; background: white; }
-            .node { border-color: black; color: black; box-shadow: none; }
-            .node.main { background: white; border: 3px solid black; color: black; }
+            .grid-2 { grid-template-columns: 1fr 1fr; gap: 40px; } /* Más espacio entre columnas al imprimir */
+            
+            /* Ajustes Sociograma para Impresión */
+            .sociogram-box { 
+                border: 1px solid #ccc; 
+                background: white; 
+                height: 500px; /* Altura fija para asegurar espacio */
+                page-break-inside: avoid;
+            }
+            .node { border-color: black; color: black; box-shadow: none; background: white; }
+            .node.main { background: white; border: 3px solid black; color: black; font-weight: 800; }
+            
+            /* Asegurar que las líneas se impriman en negro */
+            .line-stable { border-top-color: black !important; }
+            .line-distant { border-top-color: black !important; }
+            .line-conflict { border-top-color: black !important; border-top-style: dotted !important; border-width: 4px !important; }
+            .line-label { color: black !important; font-weight: bold; border: 1px solid #eee; }
         }
         
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
@@ -258,15 +239,14 @@
 </head>
 <body>
 
-<!-- Guías visuales para los agujeros (Solo visibles al imprimir) -->
-<!-- Posición estándar ISO 838: 80mm de separación, centrados -->
+<!-- Guías visuales para los 2 agujeros (Centrados verticalmente, separados 80mm) -->
 <div class="hole-guide" style="top: calc(50% - 40mm);"></div>
 <div class="hole-guide" style="top: calc(50% + 40mm);"></div>
 
 <header>
     <div>
         <h1>Arquitectura del Personaje</h1>
-        <div class="subtitle">Herramienta de Diseño Narrativo</div>
+        <div class="subtitle">Lienzo de Diseño Narrativo</div>
     </div>
     <div class="btn-group">
         <button onclick="clearData()" class="danger">
@@ -363,7 +343,7 @@
 
             <div class="form-group">
                 <label>La Mentira que se cuenta</label>
-                <div class="helper-text">¿Qué idea falsa cree sobre sí mismo o el mundo para no sufrir? (Ej: "No necesito a nadie", "Solo gana el más fuerte")</div>
+                <div class="helper-text">¿Qué idea falsa cree sobre sí mismo para no sufrir?</div>
                 <input type="text" id="mentira">
             </div>
 
@@ -396,10 +376,6 @@
             <span>▼</span>
         </div>
         <div class="section-content">
-            <div class="helper-text" style="font-weight:bold; margin-bottom:15px; border-left:3px solid #cbd5e1; padding-left:10px;">
-                "Cómo el lector lo percibe en la página."
-            </div>
-            
             <div class="grid-2">
                 <div class="form-group">
                     <label>Rasgo físico distintivo</label>
@@ -523,7 +499,7 @@
                 </div>
                 <div class="form-group">
                     <label>Círculos "Extraños" o Periféricos</label>
-                    <div class="helper-text">Grupos con los que se cruza, pero no encaja (ej: otra clase social, extraños en un bar).</div>
+                    <div class="helper-text">Grupos con los que se cruza, pero no encaja.</div>
                     <input type="text" id="circuloExtrano">
                 </div>
             </div>
@@ -533,12 +509,12 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label>Imagen Pública</label>
-                    <div class="helper-text">¿Cómo lo ve el mundo? ¿Cuál es su función reconocida? (Ej: "El que resuelve problemas", "El bufón")</div>
+                    <div class="helper-text">¿Cómo lo ve el mundo? ¿Cuál es su función reconocida?</div>
                     <input type="text" id="imagenPublica">
                 </div>
                 <div class="form-group">
                     <label>Autoimagen</label>
-                    <div class="helper-text">¿Cómo se ve él mismo? (Ej: Un impostor, una víctima, un líder)</div>
+                    <div class="helper-text">¿Cómo se ve él mismo? (Ej: Un impostor, una víctima)</div>
                     <input type="text" id="autoimagen">
                 </div>
             </div>
@@ -574,9 +550,9 @@
             <div class="sociogram-controls">
                 <input type="text" id="relName" placeholder="Nombre de otro personaje..." style="flex:2;">
                 <select id="relType" style="flex:1;">
-                    <option value="stable">Estable (─)</option>
+                    <option value="stable">Estable (—)</option>
                     <option value="distant">Distante (---)</option>
-                    <option value="conflict">Conflicto (~~~)</option>
+                    <option value="conflict">Conflicto (···)</option>
                 </select>
                 <button class="primary" onclick="addRelation()">Agregar</button>
             </div>
@@ -829,34 +805,35 @@
         const total = state.relaciones.length;
         if(total === 0) return;
 
-        const radius = 120; // Distancia del centro
-        const centerX = box.offsetWidth / 2;
-        const centerY = box.offsetHeight / 2;
-
-        // Aseguramos que el contenedor tenga tamaño relativo si no se ha renderizado bien
-        if(centerX === 0) { setTimeout(renderSociogram, 100); return; }
-
+        // RADIO AUMENTADO: 220px para asegurar espacio para la línea
+        const radius = 220; 
+        
         state.relaciones.forEach((rel, index) => {
             const angle = (index / total) * 2 * Math.PI;
             const x = Math.cos(angle) * radius;
             const y = Math.sin(angle) * radius;
 
-            // Nodo
+            // NODO SATÉLITE
             const node = document.createElement('div');
             node.className = 'node';
+            // Posicionamiento desde el centro absoluto
             node.style.left = `calc(50% + ${x}px)`;
             node.style.top = `calc(50% + ${y}px)`;
             node.style.transform = 'translate(-50%, -50%)';
             
+            let label = rel.type === 'stable' ? 'ESTABLE' : (rel.type === 'distant' ? 'DISTANTE' : 'CONFLICTO');
+
             node.innerHTML = `
                 ${rel.name}
+                <div class="line-label">${label}</div>
                 <div class="delete-btn" onclick="removeRelation(${rel.id})">×</div>
             `;
 
-            // Línea
+            // LÍNEA CONECTORA
             const line = document.createElement('div');
-            // Calculamos largo distancia entre centro y nodo
-            const length = Math.sqrt(x*x + y*y) - 50; // -50 para no tapar nodo central
+            // Largo = Radio - RadioNodoCentral/2 - RadioNodoSatelite/2 aprox
+            // 220 (radio total) - 55 (radio central) - 45 (radio nodo) = 120px de línea visible
+            const length = 220; 
             
             let typeClass = 'line-stable';
             if(rel.type === 'distant') typeClass = 'line-distant';
@@ -864,12 +841,12 @@
 
             line.className = `line ${typeClass}`;
             line.style.width = `${length}px`;
-            line.style.left = `50%`;
-            line.style.top = `50%`;
+            
+            // Rotar desde el centro
             line.style.transform = `translateY(-50%) rotate(${angle * (180/Math.PI)}deg)`;
-            line.style.transformOrigin = "0 50%";
 
-            box.appendChild(line);
+            // Z-Index truco: Poner líneas primero para que queden debajo de los nodos
+            box.insertBefore(line, center);
             box.appendChild(node);
         });
     }
