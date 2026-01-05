@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura del Personaje</title>
+    
+    <!-- Tailwind CSS (Diseño) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconos Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Fuente Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ESTILOS GENERALES --- */
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Utilidad para el slider */
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #4f46e5; cursor: pointer;
+        }
+
+        /* --- ESTILOS DE IMPRESIÓN (PDF) --- */
+        /* Estas reglas convierten la app en un documento de texto limpio */
+        
+        @media print {
+            /* 1. Fondo blanco y texto negro obligatorio */
+            body { 
+                background-color: white !important; 
+                color: black !important;
+                font-size: 11pt !important;
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+            }
+
+            /* 2. Ocultar interfaz de usuario (Botones, Header, Iconos) */
+            header, .no-print, button, .section-icon, footer, .slider-thumb { 
+                display: none !important; 
+            }
+
+            /* 3. Layout del documento */
+            main { 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                max-width: 100% !important; 
+                width: 100% !important;
+            }
+
+            /* 4. Forzar apertura de todas las secciones */
+            .section-content { 
+                display: block !important; 
+                height: auto !important; 
+                opacity: 1 !important; 
+                visibility: visible !important;
+            }
+
+            /* 5. Eliminar estilos de "Tarjeta/Caja" */
+            section, .bg-white, .rounded-xl, .shadow-sm, .border, .p-6, .p-4 { 
+                box-shadow: none !important; 
+                border: none !important;
+                border-radius: 0 !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin-bottom: 20px !important;
+            }
+
+            /* Títulos de sección */
+            .section-toggle {
+                background: transparent !important;
+                border-bottom: 2px solid #000 !important;
+                padding: 5px 0 !important;
+                margin-bottom: 15px !important;
+            }
+            .section-toggle h2 {
+                font-size: 14pt !important;
+                color: #000 !important;
+                text-transform: uppercase;
+            }
+
+            /* 6. Inputs parecen líneas de escritura */
+            input, textarea, .data-input { 
+                background: transparent !important; 
+                border: none !important;
+                border-bottom: 1px solid #999 !important; /* Línea gris para escribir */
+                padding: 2px 0 !important;
+                margin-bottom: 10px !important;
+                color: #000 !important;
+                font-family: 'Courier New', Courier, monospace !important; /* Fuente tipo máquina de escribir */
+                height: auto !important;
+                min-height: 1.5em !important;
+                resize: none !important;
+            }
+            
+            /* Ocultar placeholders al imprimir */
+            ::placeholder { color: transparent !important; }
+
+            /* 7. Etiquetas y textos de ayuda */
+            label { color: #000 !important; font-weight: bold !important; font-size: 10pt !important; }
+            p.text-xs, .section-desc { color: #555 !important; font-style: italic !important; }
+
+            /* 8. Asegurar grids en impresión (Dos columnas) */
+            .grid-cols-2, .md\:grid-cols-2 {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 20px !important;
+            }
+
+            /* 9. Sociograma limpio */
+            #sociogram-container div {
+                border-color: #000 !important;
+                color: #000 !important;
+                box-shadow: none !important;
+            }
+            .bg-indigo-600 { background: white !important; border: 2px solid black !important; color: black !important; }
+            .text-white { color: black !important; }
+            
+            /* Evitar cortes de página feos */
+            section { break-inside: avoid; }
+        }
+
+        /* Clase auxiliar para simular impresión en pantalla */
+        body.preview-mode {
+            background: #fff;
+            padding: 40px;
+        }
+        body.preview-mode header, 
+        body.preview-mode .no-print, 
+        body.preview-mode footer { display: none !important; }
+        body.preview-mode input, body.preview-mode textarea {
+            border: none; border-bottom: 1px solid #ccc; background: transparent;
+        }
+        body.preview-mode .section-content { display: block !important; }
+        body.preview-mode section { box-shadow: none; border: none; margin-bottom: 30px; }
+        body.preview-mode .section-toggle { border-bottom: 2px solid black; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 pb-20">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2 rounded-lg text-white">
+                    <i data-lucide="user" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 leading-tight">Arquitectura del Personaje</h1>
+                    <p class="text-xs text-slate-500 font-medium tracking-wide uppercase">Lienzo de Diseño Narrativo</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button onclick="app.togglePreview()" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium border border-slate-200">
+                    <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i> Vista Previa
+                </button>
+                <button onclick="app.clearData()" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Borrar todo">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </button>
+                <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium shadow-sm">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Exportar PDF</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-6 transition-all duration-300">
+        
+        <!-- Intro -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 flex flex-col md:flex-row gap-6 items-center">
+            <div class="flex-1 w-full">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nombre Completo</label>
+                <input type="text" id="nombre" placeholder="Nombre del Personaje"
+                    class="w-full text-3xl md:text-4xl font-black text-slate-900 placeholder:text-slate-300 border-b-2 border-transparent hover:border-slate-100 focus:border-indigo-500 focus:outline-none bg-transparent transition-all mb-4 data-input">
+                
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Arquetipo en una palabra</label>
+                <input type="text" id="arquetipo" placeholder="(El rebelde, la cuidadora, el cínico, etc.)"
+                    class="w-full text-lg font-medium text-indigo-600 placeholder:text-indigo-300/70 border-none focus:ring-0 bg-transparent p-0 data-input">
+            </div>
+            <div class="w-full md:w-auto flex flex-col gap-2 min-w-[200px] bg-slate-50 p-4 rounded-lg border border-slate-100 no-print">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Estado de Progreso</div>
+                <div class="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. Identidad -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg section-icon-bg"><i data-lucide="user" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">1. Identidad y Concepto</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content p-6">
+                <p class="section-desc text-sm text-slate-500 mb-6 italic border-l-4 border-indigo-200 pl-3">
+                    "El objetivo es fijar la imagen mental del personaje y su lugar en la obra."
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Apodo/s y quién se los dice</label>
+                        <input type="text" id="apodos" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Edad y fecha de nacimiento</label>
+                            <input type="text" id="edad" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Ocupación / Oficio</label>
+                            <input type="text" id="ocupacion" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Rol en la trama</label>
+                        <p class="text-xs text-slate-400 mb-1 no-print">(Protagonista, Antagonista, Aliado, etc.)</p>
+                        <input type="text" id="rol" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Contradicción Principal</label>
+                        <p class="text-xs text-slate-400 mb-1 no-print">(Ej: Es un soldado valiente que teme a la oscuridad)</p>
+                        <input type="text" id="contradiccion" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Concepto Central (Logline)</label>
+                    <p class="text-xs text-slate-500 mb-2 italic">"Es un/a [Adjetivo] que quiere [Objetivo] pero se enfrenta a [Obstáculo]"</p>
+                    <textarea id="concepto" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none min-h-[80px]"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Motor Interno -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="heart" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">2. El Motor Interno</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <p class="section-desc text-sm text-slate-500 mb-6 italic border-l-4 border-indigo-200 pl-3">
+                    "Esto es lo que define sus decisiones."
+                </p>
+                <div class="p-4 bg-red-50 rounded-lg border border-red-100 mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">La Herida (El Fantasma)</label>
+                    <p class="text-xs text-slate-500 mb-2 no-print">Un evento del pasado que todavía le duele o condiciona sus acciones.</p>
+                    <textarea id="herida" class="data-input w-full p-3 bg-white border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none min-h-[80px]"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">La Mentira que se cuenta</label>
+                    <p class="text-xs text-slate-500 mb-2 no-print">¿Qué idea falsa cree sobre sí mismo? (Ej: "No necesito a nadie")</p>
+                    <input type="text" id="mentira" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Lo que CREE que quiere (Deseo)</label>
+                        <input type="text" id="deseo" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Lo que REALMENTE necesita (Necesidad)</label>
+                        <input type="text" id="necesidad" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Línea Roja</label>
+                    <p class="text-xs text-slate-500 mb-2 no-print">¿Qué es lo que este personaje juró que NUNCA haría?</p>
+                    <input type="text" id="lineaRoja" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Presencia Física -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="eye" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">3. Presencia Física</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <p class="section-desc text-sm text-slate-500 mb-6 italic border-l-4 border-indigo-200 pl-3">
+                    "Cómo el lector lo percibe en la página."
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Rasgo Físico Distintivo</label>
+                        <input type="text" id="rasgoFisico" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">El "Delatador" (Gesto nervioso)</label>
+                        <input type="text" id="delatador" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Estilo de Movimiento</label>
+                        <input type="text" id="movimiento" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Objetos con carga emocional</label>
+                        <input type="text" id="objetos" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Firma Sensorial (Olor, tacto, sonido)</label>
+                    <input type="text" id="sensorial" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Voz y Comportamiento -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="message-square" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">4. Voz y Comportamiento</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Tono de voz y ritmo</label><input type="text" id="tono" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Muletilla recurrente</label><input type="text" id="muletilla" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Actitud ante autoridad</label><input type="text" id="autoridad" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Sentido del humor</label><input type="text" id="humor" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                    <label class="block text-sm font-semibold text-slate-700 mb-3">Dos frases típicas:</label>
+                    <input type="text" id="frase1" placeholder="1..." class="data-input w-full p-2 bg-white border border-slate-200 rounded-md text-sm italic mb-2">
+                    <input type="text" id="frase2" placeholder="2..." class="data-input w-full p-2 bg-white border border-slate-200 rounded-md text-sm italic">
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Mapa Social -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="map" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">5. El Mapa Social</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <h3 class="text-md font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">1. Círculos de Pertenencia</h3>
+                <div class="space-y-4 mb-6">
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Familia</label><input type="text" id="familia" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Círculo Íntimo</label><input type="text" id="circuloIntimo" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Círculo Funcional</label><input type="text" id="circuloFuncional" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    </div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Círculo de Interés</label><input type="text" id="circuloInteres" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Círculos Periféricos</label><input type="text" id="circuloExtrano" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                </div>
+                <h3 class="text-md font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">2. Estatus y Poder</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Imagen Pública</label><input type="text" id="imagenPublica" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    <div><label class="block text-sm font-semibold text-slate-700 mb-1">Autoimagen</label><input type="text" id="autoimagen" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                </div>
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-sm font-semibold text-slate-700">Nivel de Influencia</label>
+                        <span id="influencia-val" class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">5/10</span>
+                    </div>
+                    <input type="range" id="influencia" min="1" max="10" value="5" class="slider-thumb w-full h-2 bg-slate-200 rounded-lg appearance-none">
+                    <div class="flex justify-between text-xs text-slate-400 mt-1 no-print"><span>Bajo</span><span>Alto</span></div>
+                </div>
+                <div><label class="block text-sm font-semibold text-slate-700 mb-1">¿Insider o Outsider?</label><input type="text" id="insiderOutsider" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+            </div>
+        </section>
+
+        <!-- 6. Sociograma -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="users" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">3. El Sociograma (Esquema Visual)</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <p class="section-desc text-sm text-slate-500 mb-6 italic border-l-4 border-indigo-200 pl-3">
+                    "En el centro del círculo va el nombre de tu personaje."
+                </p>
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6">
+                    <!-- Controls -->
+                    <div class="flex flex-col sm:flex-row gap-3 mb-6 no-print">
+                        <input type="text" id="rel-name" placeholder="Nombre" class="flex-1 p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <select id="rel-type" class="p-3 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="stable">Estable (─)</option>
+                            <option value="distant">Distante (---)</option>
+                            <option value="conflict">Conflicto (~~~)</option>
+                        </select>
+                        <button onclick="app.addRelation()" class="p-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                    </div>
+                    <!-- Visual Graph -->
+                    <div id="sociogram-container" class="flex flex-wrap justify-center gap-8 py-8 min-h-[200px] items-center relative"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Dinámicas -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="brain" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">4. Dinámicas y Entorno</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-indigo-900 text-sm uppercase tracking-wide">Vínculos Clave</h3>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Anclaje</label><input type="text" id="anclaje" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Ayuda Práctica</label><input type="text" id="ayudaPractica" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Ayuda Emocional</label><input type="text" id="ayudaEmocional" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Protegido</label><input type="text" id="protegido" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-red-900 text-sm uppercase tracking-wide">Tensiones</h3>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Tensión (Odio)</label><input type="text" id="tension" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Obstáculo Social</label><input type="text" id="obstaculo" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Envidia</label><input type="text" id="envidia" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                        <div><label class="block text-sm font-semibold text-slate-700 mb-1">Espejo</label><input type="text" id="espejo" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    </div>
+                </div>
+                <div class="mt-8 pt-6 border-t border-slate-100">
+                    <h3 class="font-bold text-slate-800 text-md mb-4">5. Pez dentro y fuera del agua</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div class="p-4 bg-green-50 rounded-lg border border-green-100">
+                          <label class="block text-sm font-semibold text-slate-700 mb-1">Zona de Confort</label>
+                          <textarea id="pezDentro" class="data-input w-full p-3 bg-white border border-green-200 rounded-lg"></textarea>
+                       </div>
+                       <div class="p-4 bg-orange-50 rounded-lg border border-orange-100">
+                          <label class="block text-sm font-semibold text-slate-700 mb-1">Zona de Discomfort</label>
+                          <textarea id="pezFuera" class="data-input w-full p-3 bg-white border border-orange-200 rounded-lg"></textarea>
+                       </div>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <!-- 8. Arco -->
+        <section class="mb-6 bg-white rounded-xl shadow-sm border border-indigo-200 overflow-hidden">
+            <button class="section-toggle w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-100 text-left">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                    <h2 class="text-lg font-bold text-slate-800">El Arco de Transformación</h2>
+                </div>
+                <i data-lucide="chevron-down" class="section-icon w-5 h-5 text-slate-400 transition-transform"></i>
+            </button>
+            <div class="section-content hidden p-6">
+                <div class="relative">
+                    <div class="space-y-6 md:pl-4 relative">
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">A. Inicio</label>
+                            <textarea id="puntoA" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></textarea>
+                        </div>
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">El Detonante</label>
+                            <input type="text" id="detonante" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        </div>
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Sacrificio</label>
+                            <input type="text" id="sacrificio" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        </div>
+                        <div class="relative">
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">B. Final</label>
+                            <textarea id="puntoB" class="data-input w-full p-3 bg-slate-50 border border-slate-200 rounded-lg"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-slate-400 text-sm mt-12 mb-6 no-print">
+            <p>Basado en la guía de "Construcción del Personaje"</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- LOGICA DE LA APP (JavaScript) ---
+        const app = {
+            state: {
+                nombre: "", apodos: "", edad: "", ocupacion: "", rol: "", arquetipo: "", concepto: "", contradiccion: "",
+                herida: "", mentira: "", deseo: "", necesidad: "", lineaRoja: "",
+                rasgoFisico: "", delatador: "", movimiento: "", objetos: "", sensorial: "",
+                tono: "", muletilla: "", autoridad: "", humor: "", frase1: "", frase2: "",
+                familia: "", circuloIntimo: "", circuloFuncional: "", circuloInteres: "", circuloExtrano: "",
+                imagenPublica: "", autoimagen: "", influencia: 5, insiderOutsider: "",
+                relaciones: [],
+                anclaje: "", ayudaPractica: "", ayudaEmocional: "", protegido: "", tension: "", obstaculo: "", envidia: "", espejo: "",
+                pezDentro: "", pezFuera: "",
+                puntoA: "", detonante: "", sacrificio: "", puntoB: ""
+            },
+
+            init() {
+                this.loadData();
+                this.setupListeners();
+                this.renderSociogram();
+                this.updateProgress();
+                document.querySelectorAll('textarea').forEach(el => this.autoResize(el));
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                
+                // Abrir primera sección
+                const firstContent = document.querySelector('.section-content');
+                if (firstContent) {
+                    firstContent.classList.remove('hidden');
+                    document.querySelector('.section-icon').style.transform = 'rotate(180deg)';
+                }
+            },
+
+            loadData() {
+                const saved = localStorage.getItem('charArchJS');
+                if (saved) {
+                    try {
+                        this.state = { ...this.state, ...JSON.parse(saved) };
+                        Object.keys(this.state).forEach(key => {
+                            if (key === 'relaciones') return;
+                            const el = document.getElementById(key);
+                            if (el) {
+                                el.value = this.state[key];
+                                if(el.tagName === 'TEXTAREA') this.autoResize(el);
+                            }
+                        });
+                        const sliderVal = document.getElementById('influencia-val');
+                        if (sliderVal) sliderVal.innerText = `${this.state.influencia}/10`;
+                    } catch (e) { console.error("Error loading", e); }
+                }
+            },
+
+            saveData() {
+                localStorage.setItem('charArchJS', JSON.stringify(this.state));
+                this.updateProgress();
+            },
+
+            autoResize(el) {
+                el.style.height = 'auto';
+                el.style.height = el.scrollHeight + 'px';
+            },
+
+            setupListeners() {
+                document.querySelectorAll('.data-input, .slider-thumb').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        this.state[e.target.id] = e.target.value;
+                        if (e.target.id === 'influencia') {
+                            document.getElementById('influencia-val').innerText = `${e.target.value}/10`;
+                        }
+                        if(e.target.tagName === 'TEXTAREA') this.autoResize(e.target);
+                        this.saveData();
+                    });
+                });
+
+                document.querySelectorAll('.section-toggle').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const content = btn.nextElementSibling;
+                        const icon = btn.querySelector('.section-icon');
+                        content.classList.toggle('hidden');
+                        icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+                        if (!content.classList.contains('hidden')) content.classList.add('fade-in');
+                    });
+                });
+            },
+            
+            togglePreview() {
+                document.body.classList.toggle('preview-mode');
+                // Recalcular textareas
+                document.querySelectorAll('textarea').forEach(el => this.autoResize(el));
+            },
+
+            addRelation() {
+                const nameEl = document.getElementById('rel-name');
+                const typeEl = document.getElementById('rel-type');
+                if (!nameEl.value) return;
+                this.state.relaciones.push({ id: Date.now(), name: nameEl.value, type: typeEl.value });
+                nameEl.value = "";
+                this.saveData();
+                this.renderSociogram();
+            },
+
+            removeRelation(id) {
+                this.state.relaciones = this.state.relaciones.filter(r => r.id !== id);
+                this.saveData();
+                this.renderSociogram();
+            },
+
+            renderSociogram() {
+                const container = document.getElementById('sociogram-container');
+                if (!container) return;
+                const mainName = this.state.nombre || "PERSONAJE";
+                
+                if (this.state.relaciones.length === 0) {
+                    container.innerHTML = `<div class="relative z-10 w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center text-center p-2 shadow-lg ring-4 ring-indigo-100"><span class="font-bold text-white text-sm line-clamp-3">${mainName}</span></div>`;
+                    return;
+                }
+
+                let html = `<div class="relative z-10 w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center text-center p-2 shadow-lg ring-4 ring-indigo-100"><span class="font-bold text-white text-sm line-clamp-3">${mainName}</span></div>`;
+
+                this.state.relaciones.forEach(rel => {
+                    let lineClass = rel.type === "stable" ? "border-solid border-slate-400" : (rel.type === "distant" ? "border-dashed border-slate-400" : "border-dotted border-red-400");
+                    let ringClass = rel.type === "conflict" ? "border-red-400" : "border-slate-400";
+                    let label = rel.type === "stable" ? "Estable" : (rel.type === "distant" ? "Distante" : "Conflicto");
+
+                    html += `
+                        <div class="relative group flex flex-col items-center gap-2 fade-in">
+                            <div class="h-8 w-0 border-l-2 ${lineClass} absolute -top-8 left-1/2 -translate-x-1/2"></div>
+                            <div class="w-24 h-24 bg-white rounded-full border-2 ${ringClass} flex items-center justify-center text-center p-2 shadow-sm relative">
+                                <span class="text-xs font-semibold text-slate-700 leading-tight">${rel.name}</span>
+                                <button onclick="app.removeRelation(${rel.id})" class="absolute -top-1 -right-1 bg-red-100 text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity no-print"><i data-lucide="minus" class="w-3 h-3"></i></button>
+                            </div>
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">${label}</span>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            },
+
+            updateProgress() {
+                const totalKeys = Object.keys(this.state).length;
+                const filledKeys = Object.values(this.state).filter(v => (Array.isArray(v) ? v.length > 0 : (v !== "" && v !== 5))).length;
+                document.getElementById('progress-bar').style.width = `${(filledKeys / totalKeys) * 100}%`;
+            },
+
+            clearData() {
+                if (confirm("¿Borrar todo?")) {
+                    localStorage.removeItem('charArchJS');
+                    location.reload();
+                }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
