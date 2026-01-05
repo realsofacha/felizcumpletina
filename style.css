@@ -25,16 +25,17 @@ body {
   background: white;
 }
 
+/* Margen izquierdo simula perforaciones */
 .perforaciones {
   width: 2.5cm;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-evenly;
   align-items: center;
-  padding-top: 2cm;
-  padding-bottom: 2cm;
   background: white;
   border-right: 1px dashed var(--borde);
+  padding-top: 2cm;
+  padding-bottom: 2cm;
 }
 
 .hole {
@@ -47,7 +48,9 @@ body {
 
 .cuaderno {
   width: 18.5cm;
+  min-height: 29.7cm;
   padding: 2cm;
+  background: white;
 }
 
 .header {
@@ -61,7 +64,7 @@ body {
 .subtitulo {
   font-size: 0.9rem;
   color: #946880;
-  margin: 0;
+  margin: 0.2rem 0;
 }
 
 .acciones .btn {
@@ -94,6 +97,10 @@ body {
   border-color: var(--borde);
 }
 
+main {
+  padding-bottom: 3rem;
+}
+
 .contenido-tab {
   display: none;
 }
@@ -114,6 +121,11 @@ h2 {
   margin-top: 2rem;
 }
 
+h3 {
+  color: var(--texto);
+  margin-top: 1.5rem;
+}
+
 label {
   font-weight: bold;
   display: block;
@@ -130,10 +142,39 @@ select {
   border: 1px solid var(--borde);
   border-radius: 5px;
   background-color: #fff7fb;
+  color: var(--texto);
+  font-size: 1rem;
 }
 
 textarea {
   min-height: 60px;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-item input {
+  margin-right: 0.3rem;
+}
+
+.sociograma {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.sociograma svg {
+  width: 300px;
+  height: 300px;
 }
 
 @media print {
@@ -151,14 +192,14 @@ textarea {
 
   .cuaderno {
     width: 100%;
-    padding: 1cm 1cm 1cm 3cm;
+    padding: 2cm 2cm 2cm 3cm;
   }
 
   .perforaciones {
-    display: block;
     position: absolute;
     left: 0;
     top: 0;
     height: 100vh;
+    z-index: -1;
   }
 }
