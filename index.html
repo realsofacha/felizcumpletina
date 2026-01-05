@@ -1,488 +1,821 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arquitectura de Personaje - Cuaderno de Escritura</title>
-    <!-- Carga de librerías esenciales -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide React UMD Build -->
-    <script src="https://unpkg.com/lucide-react@0.344.0/dist/umd/lucide-react.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,900;1,900&display=swap" rel="stylesheet">
-    
-    <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            -webkit-font-smoothing: antialiased; 
-            background-color: #fdfbfc; 
-        }
-        .font-serif { font-family: 'Playfair Display', serif; }
-        .font-sans { font-family: 'Inter', sans-serif; }
-        
-        /* Animaciones */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-page { animation: fadeIn 0.6s ease-out forwards; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arquitectura de Personaje</title>
 
-        @media print {
-            @page { size: A4; margin: 0; }
-            body { background: white !important; padding: 0; }
-            .no-print { display: none !important; }
-            .print-margin { padding-left: 95px !important; } /* Margen para bibliorato */
-            input, textarea { border-bottom: 1px solid #333 !important; color: black !important; background: transparent !important; }
-            .shadow-custom { box-shadow: none !important; }
-            .min-h-paper { min-height: auto !important; }
-        }
-    </style>
+  <!-- React & ReactDOM (DEV para editar cómodo) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --paper:#ffffff;
+      --cream:#fcfaf9;
+      --ink:#4a2c35;
+      --uva:#6d4c55;
+      --uva2:#5a3e46;
+      --muted:#9c8c90;
+      --line:#d4c5c9;
+      --soft:#f7f2f3;
+      --shadow: 0 18px 50px rgba(32, 14, 18, .10);
+    }
+
+    body{
+      font-family:'Lato', sans-serif;
+      background:
+        radial-gradient(1200px 700px at 10% 0%, rgba(109,76,85,.10), transparent 60%),
+        radial-gradient(1200px 700px at 90% 10%, rgba(168,139,147,.12), transparent 55%),
+        linear-gradient(180deg, #fff, var(--cream));
+      color: var(--ink);
+      overflow-x:hidden;
+    }
+    .font-serif{ font-family:'Merriweather', serif; }
+
+    /* textura sutil tipo papel */
+    .paper-texture{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.92)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='%23d4c5c9' fill-opacity='0.14'%3E%3Ccircle cx='20' cy='25' r='1.2'/%3E%3Ccircle cx='90' cy='60' r='1.1'/%3E%3Ccircle cx='150' cy='40' r='1.2'/%3E%3Ccircle cx='60' cy='120' r='1.2'/%3E%3Ccircle cx='130' cy='140' r='1.0'/%3E%3Ccircle cx='30' cy='150' r='1.1'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover, 180px 180px;
+    }
+
+    /* Animación suave */
+    .fade-in{ animation: fadeIn .35s ease-out; }
+    @keyframes fadeIn{
+      from{ opacity:0; transform: translateY(6px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* Focus lindo en inputs */
+    .field-focus:focus{
+      box-shadow: 0 12px 28px rgba(109,76,85,.12);
+    }
+
+    /* Toast */
+    .toast{
+      animation: toastIn .25s ease-out;
+    }
+    @keyframes toastIn{
+      from{ opacity:0; transform: translateY(6px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* Print: A4 + margen perforación */
+    @media print{
+      @page{ size:A4; margin:0; }
+      body{ background:white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print{ display:none !important; }
+
+      .print-container{
+        box-shadow:none !important;
+        border:none !important;
+        padding: 40px 40px 40px 115px !important;
+        margin:0 !important;
+        width:100% !important;
+        max-width:none !important;
+        background:white !important;
+      }
+
+      input, textarea{
+        border-bottom: 1px solid #888 !important;
+        background: transparent !important;
+        color:black !important;
+        resize:none;
+      }
+
+      button{ display:none !important; }
+      .page-break{ page-break-before: always; }
+    }
+  </style>
 </head>
+
 <body>
-    <div id="root"></div>
+  <div id="root"></div>
 
-    <script type="text/babel">
-        // Acceso a los componentes de Lucide desde el espacio de nombres global
-        const { 
-            User, Heart, Eye, Users, TrendingUp, BookOpen, 
-            Printer, Save, ChevronLeft, ChevronRight, 
-            CheckCircle, Info, Sparkles, Image: ImageIcon, 
-            Volume2, Loader2 
-        } = window.Lucide;
+  <script type="text/babel">
+    const { useEffect, useMemo, useState } = React;
 
-        const apiKey = ""; // La plataforma inyecta la clave automáticamente
+    // --- ICONOS SVG ---
+    const IconUser = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    );
+    const IconEye = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    );
+    const IconMap = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+        <path d="M2 12h20"/>
+      </svg>
+    );
+    const IconGroup = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    );
+    const IconSave = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+    );
+    const IconPrint = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <rect width="12" height="8" x="6" y="14"/>
+      </svg>
+    );
+    const IconBook = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+      </svg>
+    );
+    const IconSparkles = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+        <path d="M5 3v4"/><path d="M9 3v4"/><path d="M3 5h4"/><path d="M3 9h4"/>
+      </svg>
+    );
+    const IconImage = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+        <circle cx="9" cy="9" r="2"/>
+        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+      </svg>
+    );
+    const IconVolume = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+    );
 
-        // Helper para llamadas a la API con reintentos y backoff exponencial
-        async function fetchGemini(url, options, maxRetries = 5) {
-            let delay = 1000;
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.ok) return await response.json();
-                } catch (err) {
-                    if (i === maxRetries - 1) throw err;
-                }
-                await new Promise(res => setTimeout(res, delay));
-                delay *= 2;
-            }
+    // --- Config IA ---
+    // Si no ponés API key, la app NO explota: te avisa.
+    const apiKey = ""; // <- pegá tu key acá si querés usar IA
+
+    async function apiCall(url, body) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = json?.error?.message || "Error API";
+        throw new Error(msg);
+      }
+      return json;
+    }
+
+    const App = () => {
+      const [page, setPage] = useState(1);
+      const [data, setData] = useState({});
+      const [saving, setSaving] = useState(false);
+      const [toast, setToast] = useState("");
+      const [loadingAI, setLoadingAI] = useState(null);
+      const [aiSuggestion, setAiSuggestion] = useState("");
+      const [imgUrl, setImgUrl] = useState(null);
+
+      const storageKey = "cuaderno_personaje_final_pdf_fidelity_v2";
+
+      // Load
+      useEffect(() => {
+        try {
+          const saved = localStorage.getItem(storageKey);
+          if (saved) setData(JSON.parse(saved));
+        } catch (e) {
+          console.warn("No pude leer localStorage", e);
         }
+      }, []);
 
-        const App = () => {
-            const [currentPage, setCurrentPage] = useState(1);
-            const [formData, setFormData] = useState({});
-            const [showSaveToast, setShowSaveToast] = useState(false);
-            const [isGeneratingInspiration, setIsGeneratingInspiration] = useState(false);
-            const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-            const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-            const [aiInspiration, setAiInspiration] = useState("");
-            const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
+      // Autosave
+      useEffect(() => {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(data));
+          setToast("Guardado automáticamente");
+          const t = setTimeout(() => setToast(""), 1200);
+          return () => clearTimeout(t);
+        } catch (e) {
+          console.warn("No pude guardar localStorage", e);
+        }
+      }, [data]);
 
-            // Persistencia de datos
-            useEffect(() => {
-                const saved = localStorage.getItem('cuaderno_escritura_vFinal');
-                if (saved) setFormData(JSON.parse(saved));
-            }, []);
+      const update = (key, val) => setData(prev => ({ ...prev, [key]: val }));
 
-            useEffect(() => {
-                localStorage.setItem('cuaderno_escritura_vFinal', JSON.stringify(formData));
-            }, [formData]);
+      const manualSave = () => {
+        setSaving(true);
+        setToast("Guardado ✓");
+        setTimeout(() => {
+          setSaving(false);
+          setToast("");
+        }, 1200);
+      };
 
-            const handleInputChange = (id, value) => {
-                setFormData(prev => ({ ...prev, [id]: value }));
-            };
+      const requireKey = () => {
+        if (!apiKey) {
+          setToast("⚠️ Pegá tu apiKey para usar IA");
+          setTimeout(() => setToast(""), 1600);
+          return false;
+        }
+        return true;
+      };
 
-            const saveManual = () => {
-                setShowSaveToast(true);
-                setTimeout(() => setShowSaveToast(false), 3000);
-            };
+      // Progreso “suave” (cuántos campos con contenido)
+      const progress = useMemo(() => {
+        const keys = Object.keys(data || {});
+        if (!keys.length) return 0;
+        const filled = keys.filter(k => {
+          const v = data[k];
+          if (typeof v === "boolean") return v === true;
+          return String(v || "").trim().length > 0;
+        }).length;
+        return Math.min(100, Math.round((filled / Math.max(40, keys.length)) * 100));
+      }, [data]);
 
-            // --- Gemini AI Functions ---
-            const generateInspiration = async () => {
-                if (!formData.p1_nombre && !formData.p1_logline) return;
-                setIsGeneratingInspiration(true);
-                try {
-                    const prompt = `Eres un consultor literario experto. Analiza este personaje:
-                    Nombre: ${formData.p1_nombre || 'Desconocido'}
-                    Concepto: ${formData.p1_logline || 'Sin definir'}
-                    Herida: ${formData.p1_herida || 'No definida'}
-                    
-                    Sugiere 3 formas creativas de profundizar su conflicto o enriquecer su "pasado útil" para que sea más tridimensional.`;
+      // --- IA (con guardas, así no rompe nada) ---
+      const doInspiration = async () => {
+        if (!requireKey()) return;
+        setLoadingAI("text");
+        try {
+          const prompt =
+`Analiza este personaje:
+- Nombre: ${data.nombre_completo || "(sin nombre)"}
+- Concepto: ${data.concepto_central || "(vacío)"}
+- Herida: ${data.herida || "(vacío)"}
 
-                    const result = await fetchGemini(
-                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: prompt }] }],
-                                systemInstruction: { parts: [{ text: "Responde de forma breve, inspiradora y en español." }] }
-                            })
-                        }
-                    );
-                    setAiInspiration(result.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo generar inspiración.");
-                } catch (error) { console.error(error); }
-                finally { setIsGeneratingInspiration(false); }
-            };
+Sugiere 3 conflictos profundos (con 1 frase de ejemplo de escena para cada uno).`;
 
-            const generateCharacterPortrait = async () => {
-                setIsGeneratingImage(true);
-                try {
-                    const prompt = `Fictional character portrait. Features: ${formData.p2_rasgo || 'human'}, ${formData.p1_oficio || ''}. Artistic, cinematic lighting, concept art style.`;
-                    const result = await fetchGemini(
-                        `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ instances: { prompt }, parameters: { sampleCount: 1 } })
-                        }
-                    );
-                    if (result.predictions?.[0]?.bytesBase64Encoded) {
-                        setGeneratedImageUrl(`data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`);
-                    }
-                } catch (error) { console.error(error); }
-                finally { setIsGeneratingImage(false); }
-            };
+          const res = await apiCall(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+            { contents: [{ parts: [{ text: prompt }] }] }
+          );
 
-            const playTTS = async (text) => {
-                if (!text || isPlayingAudio) return;
-                setIsPlayingAudio(true);
-                try {
-                    const result = await fetchGemini(
-                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{ parts: [{ text: text }] }],
-                                generationConfig: {
-                                    responseModalities: ["AUDIO"],
-                                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } }
-                                },
-                                model: "gemini-2.5-flash-preview-tts"
-                            })
-                        }
-                    );
-                    const pcmData = result.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-                    if (pcmData) {
-                        const binary = window.atob(pcmData);
-                        const bytes = new Uint8Array(binary.length);
-                        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                        const blob = new Blob([bytes], { type: 'audio/wav' });
-                        const audio = new Audio(URL.createObjectURL(blob));
-                        audio.onended = () => setIsPlayingAudio(false);
-                        audio.play();
-                    }
-                } catch (error) { 
-                    console.error(error); 
-                    setIsPlayingAudio(false);
+          const text = res?.candidates?.[0]?.content?.parts?.[0]?.text || "No hubo respuesta.";
+          setAiSuggestion(text);
+        } catch (e) {
+          setToast("IA: " + e.message);
+          setTimeout(() => setToast(""), 2000);
+        } finally {
+          setLoadingAI(null);
+        }
+      };
+
+      const doImage = async () => {
+        if (!requireKey()) return;
+        setLoadingAI("image");
+        try {
+          const prompt = `Character portrait, concept art. Rasgo: ${data.rasgo_fisico || "n/a"}, movimiento: ${data.estilo_movimiento || "n/a"}. Soft lighting, cinematic, clean background.`;
+
+          // OJO: este endpoint/model puede variar según tu setup real.
+          // Al menos ahora mandamos "instances" como array para evitar errores típicos.
+          const res = await apiCall(
+            `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`,
+            { instances: [{ prompt }], parameters: { sampleCount: 1 } }
+          );
+
+          const b64 = res?.predictions?.[0]?.bytesBase64Encoded;
+          if (b64) setImgUrl(`data:image/png;base64,${b64}`);
+          else throw new Error("No recibí imagen en la respuesta.");
+        } catch (e) {
+          setToast("Imagen: " + e.message);
+          setTimeout(() => setToast(""), 2000);
+        } finally {
+          setLoadingAI(null);
+        }
+      };
+
+      const doAudio = async (text) => {
+        if (!text) return;
+        if (!requireKey()) return;
+        setLoadingAI("audio");
+        try {
+          // Nota: TTS por Gemini puede requerir un formato distinto según el modelo habilitado.
+          const res = await apiCall(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`,
+            {
+              contents: [{ parts: [{ text }] }],
+              generationConfig: {
+                responseModalities: ["AUDIO"],
+                speechConfig: {
+                  voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } }
                 }
-            };
+              }
+            }
+          );
 
-            // --- Componentes Reutilizables ---
-            const InputField = ({ id, label, placeholder, multiLine = false, helpText = "" }) => (
-                <div className="mb-8 group">
-                    <label className="block text-[12px] font-black text-[#4a303a] uppercase tracking-[0.1em] mb-1.5 font-sans leading-tight">
-                        {label}
-                    </label>
-                    {multiLine ? (
-                        <textarea 
-                            value={formData[id] || ''}
-                            onChange={(e) => handleInputChange(id, e.target.value)}
-                            className="w-full bg-[#fdfbfc] border-b-2 border-[#e8dfe2] focus:border-[#8b3d54] focus:bg-white focus:outline-none py-3 px-2 text-[15px] text-[#4a303a] transition-all duration-300 min-h-[100px] font-sans leading-relaxed resize-none"
-                            placeholder={placeholder}
-                        />
-                    ) : (
-                        <input 
-                            type="text"
-                            value={formData[id] || ''}
-                            onChange={(e) => handleInputChange(id, e.target.value)}
-                            className="w-full bg-[#fdfbfc] border-b-2 border-[#e8dfe2] focus:border-[#8b3d54] focus:bg-white focus:outline-none py-2.5 px-2 text-[15px] text-[#4a303a] transition-all duration-300 font-sans"
-                            placeholder={placeholder}
-                        />
-                    )}
-                    {helpText && <p className="mt-1.5 text-[11px] text-[#9a8288] italic font-sans flex items-start gap-1.5"><Info size={13} className="mt-0.5 text-[#8b3d54] flex-shrink-0" /> {helpText}</p>}
+          const inline = res?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData;
+          const audioB64 = inline?.data;
+          if (!audioB64) throw new Error("No recibí audio en la respuesta.");
+
+          const audio = new Audio(`data:audio/wav;base64,${audioB64}`);
+          audio.play();
+        } catch (e) {
+          setToast("Audio: " + e.message);
+          setTimeout(() => setToast(""), 2000);
+        } finally {
+          setLoadingAI(null);
+        }
+      };
+
+      // --- Componentes UI ---
+      const Field = ({ id, label, help, multi, placeholder }) => (
+        <div className="mb-6">
+          <label className="block text-[11px] font-bold text-[var(--uva)] uppercase tracking-wider mb-1">
+            {label}
+          </label>
+
+          {multi ? (
+            <textarea
+              value={data[id] || ""}
+              onChange={(e) => update(id, e.target.value)}
+              className="field-focus w-full bg-white/70 border border-[var(--line)] focus:border-[var(--uva)] outline-none py-2 px-3 text-[var(--ink)] font-serif min-h-[80px] text-sm resize-none transition-all rounded-lg"
+              placeholder={placeholder}
+            />
+          ) : (
+            <input
+              value={data[id] || ""}
+              onChange={(e) => update(id, e.target.value)}
+              className="field-focus w-full bg-white/70 border border-[var(--line)] focus:border-[var(--uva)] outline-none py-2 px-3 text-[var(--ink)] font-serif text-sm transition-all rounded-lg"
+              placeholder={placeholder}
+            />
+          )}
+
+          {help && <p className="text-[11px] text-[var(--muted)] mt-1 italic font-serif">{help}</p>}
+        </div>
+      );
+
+      const CheckItem = ({ id, text, subtext }) => (
+        <div className="flex items-start gap-3 mb-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={!!data[id]}
+            onChange={(e) => update(id, e.target.checked)}
+            className="mt-1 w-4 h-4 accent-[var(--uva)] cursor-pointer"
+          />
+          <div>
+            <span className="block text-sm font-bold text-[var(--uva2)]">{text}</span>
+            {subtext && <span className="text-xs text-[var(--muted)] font-serif italic">{subtext}</span>}
+          </div>
+        </div>
+      );
+
+      const HoleGuides = () => (
+        <div className="absolute left-0 top-0 bottom-0 w-16 flex flex-col justify-center gap-[80mm] pointer-events-none opacity-20">
+          {[0,1].map(i => (
+            <div key={i} className="relative w-4 h-4 border border-[var(--uva)] rounded-full mx-auto flex items-center justify-center">
+              <div className="w-full h-[1px] bg-[var(--uva)]"></div>
+              <div className="h-full w-[1px] bg-[var(--uva)] absolute"></div>
+            </div>
+          ))}
+        </div>
+      );
+
+      const tabs = [
+        { id: 1, title: "Identidad & Motor", icon: <IconUser /> },
+        { id: 2, title: "Presencia & Voz", icon: <IconEye /> },
+        { id: 3, title: "Mapa Social", icon: <IconMap /> },
+        { id: 4, title: "Dinámicas & Arco", icon: <IconGroup /> },
+      ];
+
+      return (
+        <div className="min-h-screen flex flex-col items-center p-4 md:p-8">
+          {/* Toast */}
+          {toast && (
+            <div className="toast no-print fixed top-4 right-4 z-50 bg-white/90 backdrop-blur border border-[var(--line)] shadow-lg rounded-xl px-4 py-2 text-xs font-bold text-[var(--uva)]">
+              {toast}
+            </div>
+          )}
+
+          {/* Header */}
+          <header className="w-full max-w-5xl mb-5 flex flex-col md:flex-row md:justify-between md:items-end gap-3 no-print">
+            <div className="flex items-center gap-4">
+              <div className="bg-[var(--uva)] text-[var(--cream)] p-3 rounded-2xl shadow-md">
+                <IconBook />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-serif font-black text-[var(--uva)] leading-tight">
+                  Construcción del Personaje
+                </h1>
+                <div className="flex items-center gap-3 mt-1">
+                  <p className="text-xs text-[var(--muted)] tracking-[.25em] uppercase font-bold">
+                    Cuaderno de Escritura
+                  </p>
+                  <span className="text-[10px] px-2 py-1 rounded-full border border-[var(--line)] text-[var(--muted)] font-bold">
+                    Progreso: {progress}%
+                  </span>
                 </div>
-            );
+              </div>
+            </div>
 
-            const CheckboxField = ({ id, label, description }) => (
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-[#fff0f3] transition-colors cursor-pointer group">
-                    <input 
-                        type="checkbox" 
-                        checked={!!formData[id]}
-                        onChange={(e) => handleInputChange(id, e.target.checked)}
-                        className="mt-1 w-5 h-5 rounded border-2 border-[#d6b4bc] text-[#8b3d54] focus:ring-[#8b3d54] cursor-pointer" 
-                    />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={manualSave}
+                className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur border border-[var(--line)] rounded-xl text-xs font-bold text-[var(--uva)] hover:bg-white transition"
+              >
+                <IconSave /> {saving ? "Guardado" : "Guardar"}
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-2 px-4 py-2 bg-[var(--uva)] text-white rounded-xl text-xs font-bold hover:brightness-95 shadow-sm transition"
+              >
+                <IconPrint /> Imprimir
+              </button>
+            </div>
+          </header>
+
+          {/* Tabs */}
+          <div className="w-full max-w-5xl no-print">
+            <div className="bg-white/60 backdrop-blur border border-[var(--line)] rounded-2xl p-2 shadow-sm">
+              <div className="flex flex-wrap gap-2">
+                {tabs.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setPage(t.id)}
+                    className={[
+                      "flex items-center gap-2 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all",
+                      page === t.id
+                        ? "bg-white text-[var(--uva)] shadow border border-[var(--line)]"
+                        : "bg-transparent text-[var(--muted)] hover:bg-white/70",
+                    ].join(" ")}
+                  >
+                    <span className={page === t.id ? "text-[var(--uva)]" : "text-[var(--muted)]"}>{t.icon}</span>
+                    {t.title}
+                  </button>
+                ))}
+              </div>
+
+              {/* mini barra */}
+              <div className="mt-2 h-2 rounded-full bg-[var(--soft)] overflow-hidden">
+                <div
+                  className="h-full bg-[var(--uva)] transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* A4 Paper */}
+          <div className="w-full max-w-5xl mt-4 paper-texture shadow-[var(--shadow)] min-h-[1123px] relative p-10 md:p-14 print-container fade-in rounded-3xl border border-white/60">
+            <HoleGuides />
+
+            {/* Print header */}
+            <div className="hidden print:block mb-8 border-b-2 border-[var(--uva)] pb-2">
+              <h2 className="text-2xl font-serif text-[var(--uva)]">{tabs.find((t) => t.id === page).title}</h2>
+              <p className="text-xs text-[var(--muted)] uppercase tracking-widest">
+                Personaje: {data.nombre_completo || "_________"}
+              </p>
+            </div>
+
+            {/* PAGE 1 */}
+            {page === 1 && (
+              <div>
+                <div className="flex justify-between items-center mb-6 border-b border-black/5 pb-2">
+                  <h2 className="text-xl md:text-2xl font-serif text-[var(--uva)] italic">Identidad y Concepto</h2>
+                  <button
+                    onClick={doInspiration}
+                    disabled={loadingAI}
+                    className="no-print text-[10px] bg-[var(--muted)] text-white px-3 py-1 rounded-full flex items-center gap-1 hover:brightness-95 disabled:opacity-50 transition"
+                    title={!apiKey ? "Pegá apiKey para usar IA" : ""}
+                  >
+                    <IconSparkles /> {loadingAI === "text" ? "Pensando..." : "IA"}
+                  </button>
+                </div>
+                <p className="text-xs text-[var(--muted)] mb-6 italic font-serif">
+                  El objetivo es fijar la imagen mental del personaje y su lugar en la obra.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                  <Field id="nombre_completo" label="Nombre completo:" />
+                  <Field id="apodos" label="Apodo/s y quién se los dice:" />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                  <Field id="edad_nacimiento" label="• Edad y fecha de nacimiento:" />
+                  <Field id="ocupacion" label="Ocupación / Oficio:" />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                  <Field id="rol_trama" label="Rol en la trama:" help="(Protagonista, Antagonista, Aliado, etc.)" />
+                  <Field id="arquetipo" label="Arquetipo en una palabra:" help="(El rebelde, la cuidadora, el cínico, etc.)" />
+                </div>
+
+                <Field
+                  id="concepto_central"
+                  label="Concepto central (Logline):"
+                  multi
+                  placeholder='"Es un/a [Adjetivo] que quiere [Objetivo] pero se enfrenta a [Obstáculo]"'
+                />
+                <Field
+                  id="contradiccion_principal"
+                  label="Contradicción principal:"
+                  help="(Ejemplo: Es un soldado valiente que le teme a la oscuridad)"
+                />
+
+                <div className="mt-10 mb-6 border-b border-black/5 pb-2">
+                  <h2 className="text-xl md:text-2xl font-serif text-[var(--uva)] italic">El Motor Interno</h2>
+                </div>
+                <p className="text-xs text-[var(--muted)] mb-6 italic font-serif">
+                  Esto es lo que define sus decisiones.
+                </p>
+
+                {aiSuggestion && (
+                  <div className="no-print bg-white/70 border border-[var(--line)] p-4 rounded-2xl mb-6 text-xs italic text-[var(--uva2)] shadow-sm">
+                    {aiSuggestion}
+                  </div>
+                )}
+
+                <Field id="herida" label="La Herida (El Fantasma):" multi help="Un evento del pasado que todavía le duele o condiciona sus acciones" />
+                <Field
+                  id="mentira"
+                  label="La Mentira que se cuenta:"
+                  multi
+                  help='¿Qué idea falsa cree sobre sí mismo o el mundo para no sufrir? (Ej: "No necesito a nadie", "El mundo es un lugar donde solo gana el más fuerte")'
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                  <Field id="deseo" label="Lo que CREE que quiere (Deseo):" />
+                  <Field id="necesidad" label="Lo que REALMENTE necesita (Necesidad):" />
+                </div>
+
+                <Field id="linea_roja" label="Línea roja:" help="¿Qué es lo que este personaje juró que NUNCA haría?" />
+              </div>
+            )}
+
+            {/* PAGE 2 */}
+            {page === 2 && (
+              <div>
+                <div className="flex justify-between items-center mb-6 border-b border-black/5 pb-2">
+                  <h2 className="text-xl md:text-2xl font-serif text-[var(--uva)] italic">Presencia Física</h2>
+                  <button
+                    onClick={doImage}
+                    disabled={loadingAI}
+                    className="no-print text-[10px] bg-[var(--uva)] text-white px-3 py-1 rounded-full flex items-center gap-1 hover:brightness-95 disabled:opacity-50 transition"
+                    title={!apiKey ? "Pegá apiKey para usar IA" : ""}
+                  >
+                    <IconImage /> {loadingAI === "image" ? "Dibujando..." : "Retrato IA"}
+                  </button>
+                </div>
+                <p className="text-xs text-[var(--muted)] mb-6 italic font-serif">Cómo el lector lo percibe en la página.</p>
+
+                <div className="flex flex-col md:flex-row gap-8 mb-6">
+                  <div className="flex-1">
+                    <Field id="rasgo_fisico" label="Rasgo físico distintivo:" help="(Eso que el narrador mencionará más de una vez)" />
+                    <Field id="delatador" label='El "Delatador":' help="(Ej: Un gesto inconsciente que hace cuando miente o está nervioso)" />
+                    <Field id="estilo_movimiento" label="Estilo de movimiento:" help="¿Es torpe, elegante, ocupa mucho espacio, se encoge?" />
+                  </div>
+
+                  <div className="w-full md:w-52">
+                    <div className="w-full h-56 bg-white/70 border border-[var(--line)] rounded-2xl flex items-center justify-center relative overflow-hidden shadow-inner">
+                      {imgUrl ? (
+                        <img src={imgUrl} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="text-center">
+                          <div className="text-[10px] text-[var(--muted)] font-black tracking-widest">FOTO PERSONAJE</div>
+                          <div className="mt-2 text-[11px] text-[var(--muted)] font-serif italic">Retrato / referencia</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-2 text-[10px] text-[var(--muted)] italic font-serif">
+                      Tip: si no usás IA, podés pegar una imagen en base64 o dejarlo como marcador.
+                    </div>
+                  </div>
+                </div>
+
+                <Field id="objetos_carga" label="Objetos con carga emocional:" multi help="(Algo que siempre lleva encima y por qué)" />
+
+                <div className="bg-white/60 border border-[var(--line)] p-5 rounded-2xl mb-8 shadow-sm">
+                  <h3 className="text-[11px] font-black text-[var(--uva)] uppercase tracking-wider mb-3">Firma sensorial</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Field id="olor" label="¿A qué huele?" />
+                    <Field id="tacto" label="¿Cómo es su tacto?" />
+                    <Field id="sonido_llegar" label="¿Qué sonido hace al llegar?" />
+                  </div>
+                </div>
+
+                <div className="mb-6 border-b border-black/5 pb-2">
+                  <h2 className="text-xl md:text-2xl font-serif text-[var(--uva)] italic">Voz y Comportamiento Social</h2>
+                </div>
+                <p className="text-xs text-[var(--muted)] mb-6 italic font-serif">
+                  Para que el diálogo sea único y no suene igual al de otros personajes.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                  <Field id="tono_voz" label="Tono de voz y ritmo:" help="(Habla rápido, susurra, es gritón, usa palabras cultas):" />
+                  <Field id="muletilla" label="Muletilla o palabra recurrente:" />
+                  <Field id="actitud_autoridad" label="Actitud frente a la autoridad:" />
+                  <Field id="sentido_humor" label="Sentido del humor:" help="(Irónico, nulo, infantil, negro)" />
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-black/5">
+                  <label className="block text-[11px] font-black text-[var(--uva)] uppercase tracking-wider mb-4">
+                    Dos frases típicas que diría
+                  </label>
+
+                  {[1, 2].map((n) => (
+                    <div key={n} className="flex gap-3 items-end mb-4">
+                      <span className="text-2xl font-serif italic text-[var(--muted)]">{n}.</span>
+                      <input
+                        value={data[`frase_${n}`] || ""}
+                        onChange={(e) => update(`frase_${n}`, e.target.value)}
+                        className="field-focus flex-1 bg-white/70 border border-[var(--line)] rounded-xl px-3 py-2 font-serif italic text-[var(--ink)] outline-none text-sm"
+                        placeholder="Escribe aquí..."
+                      />
+                      <button
+                        onClick={() => doAudio(data[`frase_${n}`])}
+                        className="no-print px-3 py-2 rounded-xl border border-[var(--line)] bg-white/70 hover:bg-white transition text-[var(--muted)] hover:text-[var(--uva)]"
+                        title="Leer en voz (IA)"
+                      >
+                        <IconVolume />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* PAGE 3 */}
+            {page === 3 && (
+              <div>
+                <div className="mb-6 border-b border-black/5 pb-2">
+                  <h2 className="text-xl md:text-2xl font-serif text-[var(--uva)] italic">El Mapa Social</h2>
+                </div>
+                <p className="text-xs text-[var(--muted)] mb-8 italic font-serif">
+                  Ubicar al personaje en su red de contactos y entender su reputación.
+                </p>
+
+                <h3 className="text-sm font-black text-[var(--uva2)] mb-4">1. Círculos de Pertenencia</h3>
+                <p className="text-xs text-[var(--muted)] mb-4 italic font-serif">Grupos a los que pertenece el personaje:</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                  <CheckItem id="circulo_familia" text="Familia" subtext="¿Es un núcleo sólido, roto, ausente, tóxico?" />
+                  <CheckItem id="circulo_intimo" text="Círculo Íntimo" subtext="Amigos, pareja, o aliados en los que confía" />
+                  <CheckItem id="circulo_funcional" text="Círculo Funcional" subtext="Colegas, jefes, subordinados" />
+                  <CheckItem id="circulo_interes" text="Círculo de Interés (Ideología/Hobbies)" subtext="Clubes, religión, militancia, grupos de ocio" />
+                  <div className="md:col-span-2">
+                    <CheckItem id="circulo_extra" text='Círculos "Extraños" o Periféricos' subtext='Grupos con los que se cruza, pero no encaja (ej: gente de otra clase social, extraños en un bar, "bajo mundo" o alta sociedad)' />
+                  </div>
+                </div>
+
+                <h3 className="text-sm font-black text-[var(--uva2)] mb-4">2. Estatus y Poder Social</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6">
+                  <Field id="imagen_publica" label="¿Cómo lo ve el mundo (Imagen pública)?" help='¿Cuál es su función reconocida? (Ej: "El que resuelve problemas", "El bufón del grupo")' />
+                  <Field id="autoimagen_social" label="¿Cómo se ve él mismo dentro de la sociedad?" help="(Ej: Un impostor, un líder incomprendido, una víctima)." />
+                </div>
+
+                <div className="bg-white/60 border border-[var(--line)] p-5 rounded-2xl mb-6 shadow-sm">
+                  <label className="block text-[11px] font-black text-[var(--uva)] uppercase mb-2">Nivel de influencia</label>
+                  <p className="text-xs text-[var(--muted)] italic mb-3 font-serif">¿Qué capacidad tiene de pedir favores o ser escuchado?</p>
+                  <div className="flex flex-wrap justify-between items-center gap-2">
+                    <span className="text-[10px] uppercase font-black text-[var(--muted)]">(Bajo)</span>
+                    <div className="flex flex-wrap gap-2">
+                      {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                        <button
+                          key={n}
+                          onClick={() => update("nivel_influencia", n)}
+                          className={[
+                            "w-8 h-8 rounded-xl border text-[11px] font-black transition",
+                            data.nivel_influencia === n
+                              ? "bg-[var(--uva)] text-white border-[var(--uva)]"
+                              : "border-[var(--line)] text-[var(--muted)] bg-white/70 hover:bg-white"
+                          ].join(" ")}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                    <span className="text-[10px] uppercase font-black text-[var(--muted)]">(Alto)</span>
+                  </div>
+                </div>
+
+                <Field id="insider_outsider" label='¿Es un "Insider" o un "Outsider"?' help="(¿Se siente parte del sistema o es un observador externo que nunca termina de encajar?)." />
+              </div>
+            )}
+
+            {/* PAGE 4 */}
+            {page === 4 && (
+              <div>
+                <div className="mb-6 border-b border-black/5 pb-2">
+                  <h2 className="text-xl md:text-2xl font-serif text-[var(--uva)] italic">3. El Sociograma (Esquema Visual)</h2>
+                </div>
+                <p className="text-xs text-[var(--muted)] mb-4 italic font-serif">
+                  En el centro va tu personaje. Alrededor, los otros. Flechas para interés/tensión.
+                </p>
+
+                <div className="w-full h-64 border-2 border-dashed border-[var(--line)] rounded-3xl relative flex justify-center items-center mb-4 bg-white/60 shadow-inner">
+                  <div className="absolute bottom-2 right-4 text-[10px] text-[var(--muted)] font-black uppercase tracking-widest text-right">
+                    Líneas (-): vínculos estables.<br/>
+                    Punteadas (--): distantes/incertos.<br/>
+                    Zigzag (~~~): conflicto/choque.
+                  </div>
+                  <div className="w-32 h-32 rounded-full border-2 border-[var(--uva)] bg-white z-10 shadow-sm"></div>
+                </div>
+
+                <div className="mt-10 mb-6 border-b border-black/5 pb-2">
+                  <h2 className="text-xl md:text-2xl font-serif text-[var(--uva)] italic">4. Dinámicas de Grupo</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
+                  <Field id="vinculo_anclaje" label="El Vínculo de Anclaje:" help="¿Quién lo calma? ¿Quién es esa persona?" />
+                  <Field id="vinculo_practico" label="¿A quién busca cuando tiene un problema práctico?" help="(Dinero, ayuda física)" />
+                  <Field id="vinculo_emocional" label="¿A quién busca cuando tiene un problema emocional?" />
+                  <Field id="protege_personaje" label="¿A quién protege el personaje?" />
+                  <Field id="vinculo_tension" label="El Vínculo de Tensión:" help="¿A quién detesta? ¿Qué parte de sí ve reflejada?" />
+                  <Field id="obstaculo_social" label='¿Qué/quién es su mayor "obstáculo" social?' />
+                  <Field id="envidia_personaje" label="¿Qué es lo que más envidia de otro personaje?" />
+                  <Field id="vinculo_espejo" label="El Vínculo Espejo:" help="¿Quién representa lo que podría haber sido?" />
+                </div>
+
+                <div className="bg-[var(--uva)] p-6 rounded-3xl text-[var(--cream)] mb-10 shadow print:bg-white print:text-black print:border print:border-black">
+                  <h3 className="text-sm font-black uppercase tracking-widest mb-4 text-white/80 print:text-black">5. Pez dentro y fuera del agua</h3>
+                  <div className="space-y-4">
                     <div>
-                        <span className="block text-sm font-bold text-[#4a303a] font-sans uppercase tracking-tight">{label}</span>
-                        {description && <span className="text-xs text-[#9a8288] italic font-sans">{description}</span>}
+                      <label className="block text-[11px] font-black mb-1 opacity-95">¿En qué grupo se siente más cómodo y por qué?</label>
+                      <textarea
+                        value={data.pez_comodo || ""}
+                        onChange={(e) => update("pez_comodo", e.target.value)}
+                        className="w-full bg-[var(--uva2)] border border-white/20 outline-none text-sm py-2 px-3 rounded-2xl print:bg-transparent print:border-black font-serif text-white print:text-black"
+                        rows="2"
+                      ></textarea>
                     </div>
+                    <div>
+                      <label className="block text-[11px] font-black mb-1 opacity-95">¿Y en qué entorno social no? ¿Qué siente?</label>
+                      <textarea
+                        value={data.pez_incomodo || ""}
+                        onChange={(e) => update("pez_incomodo", e.target.value)}
+                        className="w-full bg-[var(--uva2)] border border-white/20 outline-none text-sm py-2 px-3 rounded-2xl print:bg-transparent print:border-black font-serif text-white print:text-black"
+                        rows="2"
+                      ></textarea>
+                    </div>
+                  </div>
                 </div>
-            );
 
-            const HolePunchGuides = () => (
-                <div className="absolute left-0 top-0 bottom-0 w-20 flex flex-col justify-center items-center gap-[80mm] pointer-events-none opacity-20 print:opacity-40">
-                    <div className="w-5 h-5 rounded-full border border-[#d6b4bc] flex items-center justify-center">
-                        <div className="w-[1px] h-3 bg-[#d6b4bc] absolute"></div>
-                        <div className="w-3 h-[1px] bg-[#d6b4bc] absolute"></div>
-                    </div>
-                    <div className="w-5 h-5 rounded-full border border-[#d6b4bc] flex items-center justify-center">
-                        <div className="w-[1px] h-3 bg-[#d6b4bc] absolute"></div>
-                        <div className="w-3 h-[1px] bg-[#d6b4bc] absolute"></div>
-                    </div>
+                <div className="mb-6 border-b border-black/5 pb-2">
+                  <h2 className="text-xl md:text-2xl font-serif text-[var(--uva)] italic">El Arco de Transformación</h2>
                 </div>
-            );
+                <p className="text-xs text-[var(--muted)] mb-6 italic font-serif">Cómo cambia del inicio al fin.</p>
 
-            const pages = [
-                { id: 1, title: "Identidad & Motor", icon: <User size={16} /> },
-                { id: 2, title: "Presencia & Voz", icon: <Eye size={16} /> },
-                { id: 3, title: "Mapa Social", icon: <Users size={16} /> },
-                { id: 4, title: "Dinámicas & Arco", icon: <TrendingUp size={16} /> },
-            ];
-
-            return (
-                <div className="min-h-screen bg-[#fdfbfc] p-4 md:p-8">
-                    {showSaveToast && (
-                        <div className="fixed top-8 right-8 z-50 animate-in slide-in-from-right duration-300 flex items-center gap-3 bg-[#4a303a] text-white px-6 py-4 rounded-xl shadow-2xl font-sans text-sm font-bold border-l-4 border-[#8b3d54]">
-                            <CheckCircle className="text-[#8b3d54]" size={20} /> ¡Ficha guardada!
-                        </div>
-                    )}
-
-                    <div className="max-w-5xl mx-auto">
-                        <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
-                            <div className="flex items-center gap-5">
-                                <div className="w-14 h-14 bg-[#4a303a] rounded-2xl flex items-center justify-center shadow-lg transform -rotate-2">
-                                    <BookOpen className="text-[#fdfbfc]" size={32} />
-                                </div>
-                                <div>
-                                    <h1 className="text-4xl font-serif font-black text-[#4a303a] leading-none tracking-tighter uppercase">Arquitectura de Personaje</h1>
-                                    <p className="text-[#8b3d54] font-sans text-[11px] mt-2 tracking-[0.2em] uppercase font-black opacity-70">Cuaderno de Escritura Creativa</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-3">
-                                <button onClick={saveManual} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-[#e8dfe2] rounded-xl text-sm font-bold text-[#4a303a] hover:bg-[#f3e9eb] transition-all shadow-sm"><Save size={18} /> Guardar</button>
-                                <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-2.5 bg-[#4a303a] text-white rounded-xl text-sm font-bold hover:bg-[#3a252d] transition-all shadow-lg"><Printer size={18} /> Imprimir Hoja</button>
-                            </div>
-                        </header>
-
-                        <nav className="flex flex-wrap gap-1 mb-0 no-print relative z-10">
-                            {pages.map((p) => (
-                                <button
-                                    key={p.id}
-                                    onClick={() => setCurrentPage(p.id)}
-                                    className={`flex items-center gap-2 px-6 py-3 rounded-t-xl text-[10px] font-black uppercase tracking-widest transition-all border-t border-x ${
-                                        currentPage === p.id 
-                                        ? "bg-white text-[#4a303a] border-[#e8dfe2] border-t-2 border-t-[#8b3d54] shadow-[0_-5px_15px_rgba(0,0,0,0.02)]" 
-                                        : "text-[#9a8288] hover:text-[#4a303a] bg-[#fdfbfc]/50 border-transparent"
-                                    }`}
-                                >
-                                    {p.icon} {p.title}
-                                </button>
-                            ))}
-                        </nav>
-
-                        <div className="bg-white shadow-[0_20px_50px_rgba(74,48,58,0.08)] border border-[#e8dfe2] p-10 md:p-16 md:pl-28 relative min-h-[1120px] print-margin min-h-paper">
-                            <HolePunchGuides />
-
-                            {/* PÁGINA 1: IDENTIDAD & MOTOR */}
-                            {currentPage === 1 && (
-                                <div className="animate-page">
-                                    <div className="flex items-center gap-4 mb-10">
-                                        <h2 className="text-3xl font-serif font-black text-[#4a303a] uppercase tracking-tighter">Identidad y Concepto</h2>
-                                        <div className="h-px flex-1 bg-[#e8dfe2]"></div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                                        <InputField id="p1_nombre" label="Nombre completo" />
-                                        <InputField id="p1_apodos" label="Apodo/s y quién se los dice" />
-                                        <InputField id="p1_edad" label="Edad y fecha de nacimiento" />
-                                        <InputField id="p1_oficio" label="Ocupación / Oficio" />
-                                        <InputField id="p1_rol" label="Rol en la trama" helpText="(Protagonista, Antagonista, Aliado, etc.)" />
-                                        <InputField id="p1_arquetipo" label="Arquetipo" helpText="(El rebelde, la cuidadora, el cínico, etc.)" />
-                                    </div>
-                                    <InputField id="p1_logline" label="Concepto central" helpText='"Es un/a [Adjetivo] que quiere [Objetivo] pero se enfrenta a [Obstáculo]"' multiLine />
-                                    <InputField id="p1_contradiccion" label="Contradicción principal" helpText="(Ejemplo: Es un soldado valiente que le teme a la oscuridad)" />
-                                    
-                                    <div className="flex items-center gap-4 my-10 pt-10">
-                                        <h2 className="text-3xl font-serif font-black text-[#4a303a] uppercase tracking-tighter">El Motor Interno</h2>
-                                        <div className="h-px flex-1 bg-[#e8dfe2]"></div>
-                                        <button onClick={generateInspiration} disabled={isGeneratingInspiration} className="no-print flex items-center gap-2 px-4 py-2 bg-[#8b3d54] text-white rounded-lg text-xs font-bold disabled:opacity-50 transition-all hover:bg-[#7a374a]">
-                                            {isGeneratingInspiration ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />} ✨ Inspiración
-                                        </button>
-                                    </div>
-                                    {aiInspiration && <div className="no-print mb-8 p-6 bg-[#fffafa] border-2 border-dashed border-[#d6b4bc] rounded-2xl text-sm italic text-[#4a303a] leading-relaxed">{aiInspiration}</div>}
-                                    <InputField id="p1_herida" label="La Herida (El Fantasma)" multiLine helpText="Un evento del pasado que todavía le duele" />
-                                    <InputField id="p1_mentira" label="La Mentira que se cuenta" multiLine helpText='¿Qué idea falsa cree para no sufrir? (Ej: "No necesito a nadie")' />
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                                        <InputField id="p1_deseo" label="Deseo (Lo que CREE que quiere)" />
-                                        <InputField id="p1_necesidad" label="Necesidad (Lo que REALMENTE necesita)" />
-                                    </div>
-                                    <InputField id="p1_linearoja" label="Línea roja" helpText="¿Qué es lo que juró que NUNCA haría?" />
-                                </div>
-                            )}
-
-                            {/* PÁGINA 2: PRESENCIA & VOZ */}
-                            {currentPage === 2 && (
-                                <div className="animate-page">
-                                    <div className="flex items-center gap-4 mb-10">
-                                        <h2 className="text-3xl font-serif font-black text-[#4a303a] uppercase tracking-tighter">Presencia Física</h2>
-                                        <div className="h-px flex-1 bg-[#e8dfe2]"></div>
-                                        <button onClick={generateCharacterPortrait} disabled={isGeneratingImage} className="no-print flex items-center gap-2 px-4 py-2 bg-[#4a303a] text-white rounded-lg text-xs font-bold disabled:opacity-50 transition-all hover:bg-[#3a252d]">
-                                            {isGeneratingImage ? <Loader2 size={12} className="animate-spin" /> : <ImageIcon size={12} />} ✨ Retrato IA
-                                        </button>
-                                    </div>
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-10">
-                                        <div className="lg:col-span-2">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                                                <InputField id="p2_rasgo" label="Rasgo físico distintivo" helpText="(Mencionado más de una vez)" />
-                                                <InputField id="p2_delatador" label="El 'Delatador'" helpText="(Gesto cuando miente o está nervioso)" />
-                                            </div>
-                                            <InputField id="p2_movimiento" label="Estilo de movimiento" helpText="¿Es torpe, elegante, ocupa espacio, se encoge?" />
-                                        </div>
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-full aspect-[3/4] border-2 border-dashed border-[#e8dfe2] rounded-3xl bg-[#fdfbfc] flex items-center justify-center overflow-hidden relative group shadow-sm">
-                                                {generatedImageUrl ? <img src={generatedImageUrl} className="w-full h-full object-cover" /> : <div className="text-center"><ImageIcon size={24} className="mx-auto mb-2 text-[#d6b4bc]" /><p className="text-[10px] font-black text-[#9a8288] uppercase tracking-widest">Retrato<br/>Generado</p></div>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <InputField id="p2_objetos" label="Objetos con carga emocional" multiLine helpText="Algo que siempre lleva encima y por qué" />
-                                    <div className="bg-[#fdfbfc] p-8 rounded-2xl border border-[#e8dfe2] mt-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-                                        <div className="md:col-span-3 mb-2"><h3 className="text-[12px] font-bold text-[#4a303a] uppercase tracking-widest font-sans leading-none">Firma sensorial:</h3></div>
-                                        <InputField id="p2_olor" label="¿A qué huele?" />
-                                        <InputField id="p2_tacto" label="¿Cómo es su tacto?" />
-                                        <InputField id="p2_sonido" label="¿Qué sonido hace al llegar?" />
-                                    </div>
-
-                                    <div className="flex items-center gap-4 my-10 pt-10">
-                                        <h2 className="text-3xl font-serif font-black text-[#4a303a] uppercase tracking-tighter">Voz y Social</h2>
-                                        <div className="h-px flex-1 bg-[#e8dfe2]"></div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                                        <InputField id="p2_tono" label="Tono de voz y ritmo" helpText="(Rápido, susurra, gritón, culto, etc.)" />
-                                        <InputField id="p2_muletilla" label="Muletilla o palabra recurrente" />
-                                        <InputField id="p2_autoridad" label="Actitud frente a la autoridad" />
-                                        <InputField id="p2_humor" label="Sentido del humor" helpText="(Irónico, nulo, infantil, negro)" />
-                                    </div>
-                                    <div className="mt-10 border-t border-[#e8dfe2] pt-10">
-                                        <label className="block text-sm font-bold text-[#4a303a] mb-8 uppercase tracking-widest font-sans">Dos frases típicas que diría:</label>
-                                        <div className="space-y-10">
-                                            {[1, 2].map(n => (
-                                                <div key={n} className="flex gap-6 items-center group">
-                                                    <span className="text-[#e8dfe2] font-serif font-black italic text-5xl group-hover:text-[#8b3d54] transition-colors">{n}.</span>
-                                                    <input value={formData[`p2_frase${n}`] || ''} onChange={(e) => handleInputChange(`p2_frase${n}`, e.target.value)} className="flex-1 bg-transparent border-b-2 border-[#e8dfe2] py-3 italic text-lg font-serif outline-none text-[#4a303a]" placeholder="«Cita literal del personaje...»" />
-                                                    <button onClick={() => playTTS(formData[`p2_frase${n}`])} className="no-print text-[#8b3d54] p-3 hover:bg-[#fff0f3] rounded-full transition-all" title="Escuchar voz ✨"><Volume2 size={24} /></button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* PÁGINA 3: MAPA SOCIAL */}
-                            {currentPage === 3 && (
-                                <div className="animate-page">
-                                    <div className="flex items-center gap-4 mb-10">
-                                        <h2 className="text-3xl font-serif font-black text-[#4a303a] uppercase tracking-tighter">El Mapa Social</h2>
-                                        <div className="h-px flex-1 bg-[#e8dfe2]"></div>
-                                    </div>
-                                    <h3 className="text-xs font-bold text-[#8b3d54] uppercase tracking-[0.2em] mb-8 font-sans">1. Círculos de Pertenencia</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
-                                        <CheckboxField id="p3_fam" label="Familia" description="Sólido, roto, ausente, tóxico, etc." />
-                                        <CheckboxField id="p3_int" label="Círculo Íntimo" description="Amigos, pareja, o aliados en los que confía" />
-                                        <CheckboxField id="p3_fun" label="Círculo Funcional" description="Colegas, jefes, subordinados" />
-                                        <CheckboxField id="p3_int_h" label="Círculo de Interés" description="Ideología, hobbies, clubes, religión, etc." />
-                                        <div className="md:col-span-2 mt-2">
-                                            <CheckboxField id="p3_per" label="Círculos Periféricos" description="Gente con la que se cruza pero no encaja (bajo mundo, alta sociedad, etc.)" />
-                                        </div>
-                                    </div>
-                                    <h3 className="text-xs font-bold text-[#8b3d54] uppercase tracking-[0.2em] mb-8 font-sans">2. Estatus y Poder Social</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                                        <InputField id="p3_img" label="Imagen pública" helpText='Función reconocida (Ej: "El bufón", "El líder")' />
-                                        <InputField id="p3_auto" label="Autoimagen dentro de la sociedad" helpText="(Ej: Un impostor, una víctima, un líder)" />
-                                    </div>
-                                    <div className="flex flex-col md:flex-row gap-12 mt-8 items-start">
-                                        <div className="flex-1 w-full p-8 bg-[#fdfbfc] rounded-2xl border border-[#e8dfe2] shadow-sm">
-                                            <label className="block text-sm font-bold text-[#4a303a] mb-6 uppercase tracking-wider">Nivel de influencia</label>
-                                            <div className="flex items-center justify-between gap-1">
-                                                <span className="text-[10px] text-[#9a8288] font-bold uppercase">Bajo</span>
-                                                {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                                                    <button key={n} onClick={() => handleInputChange('p3_influencia', n)} className={`w-9 h-9 rounded-xl border-2 text-xs flex items-center justify-center transition-all ${formData['p3_influencia'] === n ? "bg-[#4a303a] border-[#4a303a] text-white font-bold shadow-lg" : "border-[#e8dfe2] text-[#9a8288] hover:border-[#8b3d54]"}`}>{n}</button>
-                                                ))}
-                                                <span className="text-[10px] text-[#9a8288] font-bold uppercase">Alto</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex-1 w-full">
-                                            <InputField id="p3_inout" label="¿Insider o Outsider?" helpText="(¿Se siente parte o es un observador externo?)" />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* PÁGINA 4: DINÁMICAS & ARCO */}
-                            {currentPage === 4 && (
-                                <div className="animate-page">
-                                    <div className="flex items-center gap-4 mb-10">
-                                        <h2 className="text-3xl font-serif font-black text-[#4a303a] uppercase tracking-tighter">Sociograma & Arco</h2>
-                                        <div className="h-px flex-1 bg-[#e8dfe2]"></div>
-                                    </div>
-                                    <div className="mb-16">
-                                        <h3 className="text-xs font-bold text-[#8b3d54] uppercase tracking-[0.2em] mb-6 font-sans">3. El Sociograma (Esquema Visual)</h3>
-                                        <p className="text-[11px] text-[#9a8288] mb-8 italic font-sans leading-relaxed">Dibuja a tu personaje en el centro. Alrededor, escribe los otros personajes/grupos. Usa flechas para marcar interés o tensión.</p>
-                                        <div className="border-2 border-dashed border-[#e8dfe2] rounded-[40px] aspect-[16/9] flex items-center justify-center flex-col bg-[#fdfbfc]/40 relative overflow-hidden group shadow-inner">
-                                            <div className="w-52 h-52 rounded-full border-8 border-[#4a303a] bg-white z-10 shadow-2xl flex items-center justify-center">
-                                                {/* Espacio limpio para el nombre */}
-                                            </div>
-                                            <div className="absolute top-10 right-10 text-[10px] font-bold text-[#9a8288] uppercase tracking-widest text-right leading-relaxed opacity-60">Dibuja flechas de<br/>interés / tensión</div>
-                                            <div className="absolute bottom-10 flex gap-8 text-[10px] font-bold text-[#4a303a] uppercase tracking-widest bg-white/90 px-8 py-3 rounded-full shadow-sm border border-[#e8dfe2] backdrop-blur-sm">
-                                                <span className="flex items-center gap-2"><div className="w-6 h-0.5 bg-[#d6b4bc]"></div> Estable (-)</span>
-                                                <span className="flex items-center gap-2"><div className="w-6 h-0.5 border-t-2 border-dashed border-[#e8dfe2]"></div> Incierto (--)</span>
-                                                <span className="flex items-center gap-2"><div className="text-[#8b3d54] font-black tracking-tighter text-base -mt-1">~~~</div> zigzag (~~~): Conflicto</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                                        <InputField id="p4_anc" label="El Vínculo de Anclaje" helpText="¿Quién logra calmarlo? ¿Quién es para él?" />
-                                        <InputField id="p4_ten" label="El Vínculo de Tensión" helpText="¿A quién detesta? ¿Qué proyecta?" />
-                                        <InputField id="p4_pra" label="Ayuda Práctica" helpText="(A quién busca ante problemas de dinero o físicos)" />
-                                        <InputField id="p4_pro" label="¿A quién protege el personaje?" />
-                                        <InputField id="p4_env" label="¿Qué es lo que más envidia de otro?" />
-                                        <InputField id="p4_esp" label="El Vínculo Espejo" helpText="¿Quién representa el camino que no tomó?" />
-                                    </div>
-                                    <div className="bg-[#4a303a] p-10 rounded-[32px] mt-10 shadow-2xl no-print">
-                                        <h3 className="text-xs font-bold text-white uppercase tracking-[0.3em] mb-8 text-center">5. Pez dentro y fuera del agua</h3>
-                                        <div className="space-y-6">
-                                            <textarea value={formData['p4_com'] || ''} onChange={(e) => handleInputChange('p4_com', e.target.value)} className="w-full bg-[#3a252d] border-b border-[#5d454d] outline-none py-4 px-3 text-white text-[15px] font-sans rounded-t-lg transition-colors focus:border-[#8b3d54]" placeholder="¿En qué grupo se siente más cómodo y por qué?" />
-                                            <textarea value={formData['p4_hos'] || ''} onChange={(e) => handleInputChange('p4_hos', e.target.value)} className="w-full bg-[#3a252d] border-b border-[#5d454d] outline-none py-4 px-3 text-white text-[15px] font-sans rounded-t-lg transition-colors focus:border-[#8b3d54]" placeholder="¿Y en qué entorno social no? ¿Qué siente? (Vergüenza, Enojo, etc.)" />
-                                        </div>
-                                    </div>
-                                    <div className="mt-20 pt-10 border-t-2 border-[#e8dfe2]">
-                                        <h2 className="text-3xl font-serif font-black text-[#4a303a] uppercase tracking-tighter mb-10">Arco de Transformación</h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-                                            <InputField id="p4_a" label="Punto A (Inicio)" multiLine helpText="Estado emocional y social al arrancar" />
-                                            <InputField id="p4_det" label="El Detonante" multiLine helpText="Evento que lo obliga a cambiar" />
-                                            <InputField id="p4_sac" label="Sacrificio" multiLine helpText="¿Qué debe perder para ganar?" />
-                                            <InputField id="p4_b" label="Punto B (Final)" multiLine helpText="Nueva visión del mundo tras la historia" />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            <footer className="mt-24 pt-10 border-t-4 border-[#e8dfe2] flex justify-between items-center text-[10px] text-[#9a8288] font-sans font-black uppercase tracking-[0.2em]">
-                                <span>Capítulo I: Génesis del Personaje</span>
-                                <div className="flex gap-8 no-print">
-                                    <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="hover:text-[#8b3d54] disabled:opacity-20 transition-all"><ChevronLeft size={16} /></button>
-                                    <button disabled={currentPage === 4} onClick={() => setCurrentPage(p => p + 1)} className="hover:text-[#8b3d54] disabled:opacity-20 transition-all"><ChevronRight size={16} /></button>
-                                </div>
-                                <span>Pág {currentPage} / 4</span>
-                            </footer>
-                        </div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                  <Field id="punto_a" label="Punto A (Inicio):" help="¿En qué estado emocional y social arranca?" />
+                  <Field id="detonante" label="El Detonante:" help="¿Qué evento lo obliga a cambiar?" />
+                  <Field id="sacrificio" label="Sacrificio:" help="¿Qué pierde o deja atrás para ganar su objetivo?" />
+                  <Field id="punto_b" label="Punto B (Final):" help="¿Cómo es su nueva visión del mundo?" />
                 </div>
-            );
-        };
+              </div>
+            )}
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+            {/* Footer */}
+            <div className="mt-12 pt-6 border-t border-black/10 flex justify-between text-[10px] text-[var(--muted)] font-black uppercase tracking-widest no-print">
+              <span>Volumen I: Construcción</span>
+              <div className="flex gap-4">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => p - 1)}
+                  className="hover:text-[var(--uva)] disabled:opacity-30 transition"
+                >
+                  Anterior
+                </button>
+                <button
+                  disabled={page === 4}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="hover:text-[var(--uva)] disabled:opacity-30 transition"
+                >
+                  Siguiente
+                </button>
+              </div>
+              <span>Página {page} / 4</span>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
 </body>
 </html>
