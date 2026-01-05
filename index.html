@@ -35,15 +35,229 @@
       <main>
         <section id="identidad" class="contenido-tab activo">
           <!-- Bloque Identidad y Motor -->
+          <h2>Identidad y Concepto</h2>
+<p class="instruccion">El objetivo es fijar la imagen mental del personaje y su lugar en la obra.</p>
+
+<label>Nombre completo</label>
+<input type="text" />
+
+<label>Apodo/s y quién se los dice</label>
+<input type="text" />
+
+<label>Edad</label>
+<input type="number" min="0" />
+
+<label>Fecha de nacimiento</label>
+<input type="text" placeholder="DD/MM/AAAA" />
+
+<label>Ocupación / Oficio</label>
+<input type="text" />
+
+<label>Rol en la trama</label>
+<select>
+  <option>Protagonista</option>
+  <option>Antagonista</option>
+  <option>Aliado</option>
+  <option>Secundario</option>
+  <option>Otro</option>
+</select>
+
+<label>Arquetipo en una palabra</label>
+<input type="text" placeholder="Ej: El rebelde, la cuidadora, el cínico..." />
+
+<label>Concepto central</label>
+<textarea placeholder='Ej: "Es un/a [adjetivo] que quiere [objetivo] pero se enfrenta a [obstáculo]"'></textarea>
+
+<label>Contradicción principal</label>
+<textarea placeholder="Ej: Es un soldado valiente que le teme a la oscuridad"></textarea>
+
+<h2>El Motor Interno</h2>
+<p class="instruccion">Esto es lo que define sus decisiones.</p>
+
+<label>La Herida (El Fantasma)</label>
+<textarea placeholder="Un evento del pasado que todavía le duele o condiciona sus acciones"></textarea>
+
+<label>La Mentira que se cuenta</label>
+<textarea placeholder="¿Qué idea falsa cree sobre sí mismo o el mundo para no sufrir? Ej: 'No necesito a nadie'"></textarea>
+
+<label>Lo que CREE que quiere (Deseo)</label>
+<textarea></textarea>
+
+<label>Lo que REALMENTE necesita (Necesidad)</label>
+<textarea></textarea>
+
+<label>Línea roja</label>
+<textarea placeholder="¿Qué es lo que este personaje juró que NUNCA haría?"></textarea>
+
         </section>
         <section id="presencia" class="contenido-tab">
           <!-- Bloque Presencia física y voz -->
+          <h2>Presencia Física</h2>
+<p class="instruccion">Cómo el lector lo percibe en la página.</p>
+
+<label>Rasgo físico distintivo</label>
+<input type="text" placeholder="Eso que el narrador mencionará más de una vez" />
+
+<label>El 'Delatador'</label>
+<input type="text" placeholder="Ej: Un gesto inconsciente cuando miente o está nervioso" />
+
+<label>Estilo de movimiento</label>
+<textarea placeholder="¿Es torpe, elegante, ocupa mucho espacio, se encoge...?"></textarea>
+
+<label>Objetos con carga emocional</label>
+<textarea placeholder="Ej: Algo que siempre lleva encima y por qué"></textarea>
+
+<label>Firma sensorial</label>
+<textarea placeholder="¿A qué huele? ¿Cómo es su tacto? ¿Qué sonido hace al llegar?"></textarea>
+
+<h2>Voz y Comportamiento Social</h2>
+<p class="instruccion">Para que el diálogo sea único y no suene igual al de otros personajes.</p>
+
+<label>Tono de voz y ritmo</label>
+<textarea placeholder="Ej: Habla rápido, susurra, es gritón, usa palabras cultas..."></textarea>
+
+<label>Muletilla o palabra recurrente</label>
+<input type="text" />
+
+<label>Actitud frente a la autoridad</label>
+<textarea></textarea>
+
+<label>Sentido del humor</label>
+<select>
+  <option>Irónico</option>
+  <option>Nulo</option>
+  <option>Infantil</option>
+  <option>Negro</option>
+  <option>Otro</option>
+</select>
+
+<label>Dos frases típicas que diría</label>
+<input type="text" placeholder="Frase 1" />
+<input type="text" placeholder="Frase 2" />
+
         </section>
         <section id="mapa" class="contenido-tab">
           <!-- Bloque Mapa social y sociograma -->
+          <h2>El Mapa Social</h2>
+<p class="instruccion">Ubicar al personaje en su red de contactos y entender su reputación.</p>
+
+<h3>1. Círculos de Pertenencia</h3>
+
+<label>Familia</label>
+<textarea placeholder="¿Es un núcleo sólido, roto, ausente, tóxico?"></textarea>
+
+<label>Círculo Íntimo</label>
+<textarea placeholder="Amigos, pareja, o aliados en los que confía"></textarea>
+
+<label>Círculo Funcional</label>
+<textarea placeholder="Colegas, jefes, subordinados"></textarea>
+
+<label>Círculo de Interés (Ideología / Hobbies)</label>
+<textarea placeholder="Clubes, religión, militancia, grupos de ocio"></textarea>
+
+<label>Círculos 'Extraños' o Periféricos</label>
+<textarea placeholder="Grupos con los que se cruza pero no encaja (ej: clase social distinta, bajo mundo, etc.)"></textarea>
+
+<h3>2. Estatus y Poder Social</h3>
+
+<label>¿Cómo lo ve el mundo? (Imagen pública)</label>
+<input type="text" placeholder='Ej: "El que resuelve problemas", "El bufón del grupo"...' />
+
+<label>¿Cómo se ve él mismo dentro de la sociedad?</label>
+<input type="text" placeholder='Ej: Un impostor, un líder incomprendido...' />
+
+<label>Nivel de influencia</label>
+<div class="checkbox-group">
+  <span class="checkbox-item"><input type="radio" name="influencia" value="1" /> 1</span>
+  <span class="checkbox-item"><input type="radio" name="influencia" value="2" /> 2</span>
+  <span class="checkbox-item"><input type="radio" name="influencia" value="3" /> 3</span>
+  <span class="checkbox-item"><input type="radio" name="influencia" value="4" /> 4</span>
+  <span class="checkbox-item"><input type="radio" name="influencia" value="5" /> 5</span>
+  <span class="checkbox-item"><input type="radio" name="influencia" value="6" /> 6</span>
+  <span class="checkbox-item"><input type="radio" name="influencia" value="7" /> 7</span>
+  <span class="checkbox-item"><input type="radio" name="influencia" value="8" /> 8</span>
+  <span class="checkbox-item"><input type="radio" name="influencia" value="9" /> 9</span>
+  <span class="checkbox-item"><input type="radio" name="influencia" value="10" /> 10</span>
+</div>
+
+<label>¿Es un Insider o un Outsider?</label>
+<select>
+  <option>Insider</option>
+  <option>Outsider</option>
+  <option>No definido</option>
+</select>
+
+<h3>3. Sociograma (Esquema Visual)</h3>
+<p>
+  En el centro del círculo va el nombre de tu personaje. Alrededor, escribí los nombres de los otros personajes o grupos. Usá flechas para marcar la dirección del interés o la tensión.
+</p>
+<ul>
+  <li>— Líneas continuas: Vínculos estables</li>
+  <li>- - Líneas punteadas: Vínculos distantes o inciertos</li>
+  <li>~~~ Líneas en zigzag: Vínculos de conflicto o choque</li>
+</ul>
+
+<div class="sociograma">
+  <svg viewBox="0 0 300 300">
+    <circle cx="150" cy="150" r="140" fill="none" stroke="#d8a1c4" stroke-width="2" />
+    <text x="150" y="150" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#a0587a">
+      (nombre)
+    </text>
+  </svg>
+</div>
+
         </section>
         <section id="dinamicas" class="contenido-tab">
           <!-- Bloque Dinámicas y arco -->
+          <h2>4. Dinámicas de Grupo</h2>
+
+<label>El Vínculo de Anclaje</label>
+<textarea placeholder="¿Quién es la única persona que logra calmar al personaje? ¿Quién es para él esa persona?"></textarea>
+
+<label>¿A quién busca cuando tiene un problema práctico?</label>
+<textarea placeholder="Ej: Dinero, ayuda física, resolver situaciones concretas..."></textarea>
+
+<label>¿A quién busca cuando tiene un problema emocional?</label>
+<textarea></textarea>
+
+<label>¿A quién protege el personaje?</label>
+<textarea></textarea>
+
+<label>El Vínculo de Tensión</label>
+<textarea placeholder="¿A quién detesta? ¿Qué parte de sí mismo ve reflejada en esa persona?"></textarea>
+
+<label>¿Cuál es su mayor 'obstáculo' social?</label>
+<textarea></textarea>
+
+<label>¿Qué es lo que más envidia de otro personaje?</label>
+<textarea></textarea>
+
+<label>El Vínculo Espejo</label>
+<textarea placeholder="¿Qué otro personaje representa lo que el protagonista podría haber sido si tomaba otras decisiones?"></textarea>
+
+<h2>5. Pez dentro y fuera del agua</h2>
+
+<label>¿En qué grupo se siente más cómodo y por qué?</label>
+<textarea></textarea>
+
+<label>¿En qué entorno social no encaja? ¿Qué siente?</label>
+<textarea placeholder="Ej: Vergüenza, enojo, tristeza, inseguridad..."></textarea>
+
+<h2>El Arco de Transformación</h2>
+<p class="instruccion">Cómo planeas que cambie el personaje desde el inicio al fin.</p>
+
+<label>Punto A (Inicio)</label>
+<textarea placeholder="¿En qué estado emocional y social arranca?"></textarea>
+
+<label>El Detonante</label>
+<textarea placeholder="¿Qué evento lo obliga a cambiar?"></textarea>
+
+<label>El Sacrificio</label>
+<textarea placeholder="¿Qué tiene que perder o dejar atrás para alcanzar su objetivo?"></textarea>
+
+<label>Punto B (Final)</label>
+<textarea placeholder="¿Cómo es su nueva visión del mundo tras la historia?"></textarea>
+
         </section>
       </main>
     </div>
