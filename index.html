@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arquitectura del Personaje (Completo)</title>
+    <title>Arquitectura del Personaje (Edición Impresa)</title>
     <style>
         /* --- ESTILOS BASE (CSS PURO) --- */
         :root {
@@ -199,14 +199,44 @@
             font-size: 14px;
             border: 2px solid white;
         }
+        
+        /* MARCADORES DE AGUJEROS (Ocultos por defecto) */
+        .hole-guide { display: none; }
 
-        /* --- IMPRESIÓN --- */
+        /* --- IMPRESIÓN (PDF) --- */
         @media print {
-            body { background: white; color: black; font-size: 11pt; }
+            @page {
+                size: A4;
+                margin: 0; /* Controlamos márgenes manualmente en el body */
+            }
+
+            body { 
+                background: white; 
+                color: black; 
+                font-size: 11pt;
+                /* Margen superior, derecho, inferior, IZQUIERDO (Extra para agujeros) */
+                margin: 15mm 15mm 15mm 25mm !important; 
+            }
+            
+            /* Guías de perforación */
+            .hole-guide {
+                display: block !important;
+                position: fixed;
+                left: 12mm; /* Ubicación estándar desde el borde */
+                width: 6mm;
+                height: 6mm;
+                border: 1px solid #aaa;
+                border-radius: 50%;
+                z-index: 9999;
+                /* Centrado vertical del orificio */
+                transform: translateY(-50%);
+            }
+
             header, .sociogram-controls, button, footer { display: none !important; }
             .card { box-shadow: none; border: none; padding: 0; margin-bottom: 30px; page-break-inside: avoid; }
             .section-header { border-bottom: 2px solid black; padding-left: 0; pointer-events: none; }
             .section-content { display: block !important; padding: 10px 0; }
+            
             input, textarea, select { 
                 border: none; border-bottom: 1px solid #999; 
                 border-radius: 0; padding: 0; 
@@ -216,18 +246,22 @@
             }
             .hero-input { border-bottom: 2px solid black !important; }
             .helper-text { color: #444; font-size: 9pt; margin-top: 2px; }
-            /* Mostrar descripciones completas en impresión */
+            
             .grid-2 { grid-template-columns: 1fr 1fr; gap: 30px; }
             .sociogram-box { border: 1px solid #000; background: white; }
             .node { border-color: black; color: black; box-shadow: none; }
             .node.main { background: white; border: 3px solid black; color: black; }
         }
         
-        /* Iconos SVG simples */
         .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
     </style>
 </head>
 <body>
+
+<!-- Guías visuales para los agujeros (Solo visibles al imprimir) -->
+<!-- Posición estándar ISO 838: 80mm de separación, centrados -->
+<div class="hole-guide" style="top: calc(50% - 40mm);"></div>
+<div class="hole-guide" style="top: calc(50% + 40mm);"></div>
 
 <header>
     <div>
