@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arquitectura del Personaje (Edición Impresa)</title>
+    <title>Arquitectura del Personaje (Edición Impresa Pro)</title>
     <style>
         /* --- ESTILOS BASE --- */
         :root {
@@ -101,18 +101,18 @@
             font-weight: 800; color: #0f172a;
         }
 
-        /* --- SOCIOGRAMA MEJORADO --- */
+        /* --- SOCIOGRAMA --- */
         .sociogram-box {
             border: 2px dashed #cbd5e1;
             border-radius: 8px;
             padding: 20px;
             background: #f8fafc;
-            min-height: 400px; /* Más altura para evitar superposición */
+            min-height: 400px;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            overflow: hidden; /* Evitar scrollbars */
+            overflow: hidden;
         }
         
         .node {
@@ -120,7 +120,7 @@
             background: white;
             border: 2px solid #64748b;
             border-radius: 50%;
-            width: 90px; height: 90px; /* Un poco más pequeños */
+            width: 90px; height: 90px;
             display: flex; align-items: center; justify-content: center;
             text-align: center; font-size: 0.75rem; font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -135,7 +135,6 @@
             z-index: 20;
         }
         
-        /* Líneas de conexión más robustas */
         .line {
             position: absolute;
             top: 50%; left: 50%;
@@ -144,27 +143,14 @@
             height: 0;
         }
         
-        /* Estilos de línea específicos */
-        .line-stable { 
-            border-top: 2px solid #64748b; 
-        }
-        .line-distant { 
-            border-top: 2px dashed #64748b; 
-        }
-        .line-conflict { 
-            border-top: 4px dotted #ef4444; /* Puntos gruesos para conflicto */
-        }
+        .line-stable { border-top: 2px solid #64748b; }
+        .line-distant { border-top: 2px dashed #64748b; }
+        .line-conflict { border-top: 4px dotted #ef4444; }
 
-        /* Texto sobre la línea */
         .line-label {
-            position: absolute;
-            left: 50%; top: -15px;
-            transform: translateX(-50%);
-            font-size: 10px;
-            background: white;
-            padding: 0 4px;
-            color: #64748b;
-            text-transform: uppercase;
+            position: absolute; left: 50%; top: -15px; transform: translateX(-50%);
+            font-size: 10px; background: white; padding: 0 4px;
+            color: #64748b; text-transform: uppercase;
         }
 
         .delete-btn {
@@ -175,25 +161,39 @@
         }
         
         .hole-guide { display: none; }
+        /* Título solo para impresión */
+        .print-title { display: none; }
 
-        /* --- IMPRESIÓN --- */
+        /* --- IMPRESIÓN MEJORADA --- */
         @media print {
             @page {
                 size: A4;
-                margin: 0; 
+                margin: 0;
             }
 
             body { 
                 background: white; color: black; font-size: 11pt;
-                /* Márgenes ajustados para equilibrio y agujeros */
+                /* Márgenes de contenido */
                 margin: 15mm 20mm 15mm 30mm !important; 
             }
             
+            /* Título especial para la primera página */
+            header { display: none !important; } /* Ocultar header web */
+            .print-title {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid black;
+                padding-bottom: 10px;
+            }
+            .print-title h1 { font-size: 24pt; margin: 0; text-transform: uppercase; }
+            .print-title p { font-size: 10pt; margin: 0; color: #666; letter-spacing: 2px; text-transform: uppercase; }
+
             /* Guías de perforación */
             .hole-guide {
                 display: block !important;
                 position: fixed;
-                left: 12mm; /* En el margen izquierdo */
+                left: 12mm; 
                 width: 6mm; height: 6mm;
                 border: 1px solid #999;
                 border-radius: 50%;
@@ -201,33 +201,49 @@
                 transform: translateY(-50%);
             }
 
-            header, .sociogram-controls, button, footer { display: none !important; }
-            .card { box-shadow: none; border: none; padding: 0; margin-bottom: 20px; page-break-inside: avoid; }
-            .section-header { border-bottom: 2px solid black; padding-left: 0; pointer-events: none; margin-bottom: 10px; }
-            .section-content { display: block !important; padding: 5px 0; }
+            .sociogram-controls, button, footer { display: none !important; }
             
+            /* Tarjetas limpias */
+            .card { box-shadow: none; border: none; padding: 0; margin-bottom: 25px; page-break-inside: avoid; }
+            
+            /* Encabezados de sección más compactos */
+            .section-header { 
+                border-bottom: 1px solid black; 
+                padding: 0 0 5px 0; 
+                margin-bottom: 15px; 
+                pointer-events: none; 
+                background: transparent;
+            }
+            .section-title { font-size: 14pt; }
+            .section-content { display: block !important; padding: 0; }
+            
+            /* Inputs estilo línea */
             input, textarea, select { 
                 border: none; border-bottom: 1px solid #666; 
                 border-radius: 0; padding: 2px 0; 
                 font-family: 'Courier New', monospace; 
                 resize: none; min-height: 1.5em;
+                margin-bottom: 5px;
             }
-            .hero-input { border-bottom: 2px solid black !important; font-size: 24pt; margin-bottom: 10px; }
+            
+            /* Intro: Input gigante alineado */
+            .intro-card { margin-top: 0 !important; margin-bottom: 40px !important; }
+            .hero-input { border-bottom: 2px solid black !important; font-size: 22pt; margin-bottom: 5px; font-weight: bold; }
+            
             .helper-text { color: #444; font-size: 9pt; font-style: italic; }
             
-            .grid-2 { grid-template-columns: 1fr 1fr; gap: 40px; } /* Más espacio entre columnas al imprimir */
+            .grid-2 { grid-template-columns: 1fr 1fr; gap: 40px; }
             
-            /* Ajustes Sociograma para Impresión */
+            /* Sociograma impresión */
             .sociogram-box { 
                 border: 1px solid #ccc; 
                 background: white; 
-                height: 500px; /* Altura fija para asegurar espacio */
+                height: 500px;
                 page-break-inside: avoid;
             }
             .node { border-color: black; color: black; box-shadow: none; background: white; }
             .node.main { background: white; border: 3px solid black; color: black; font-weight: 800; }
             
-            /* Asegurar que las líneas se impriman en negro */
             .line-stable { border-top-color: black !important; }
             .line-distant { border-top-color: black !important; }
             .line-conflict { border-top-color: black !important; border-top-style: dotted !important; border-width: 4px !important; }
@@ -239,10 +255,11 @@
 </head>
 <body>
 
-<!-- Guías visuales para los 2 agujeros (Centrados verticalmente, separados 80mm) -->
+<!-- Guías de agujeros (Solo impresión) -->
 <div class="hole-guide" style="top: calc(50% - 40mm);"></div>
 <div class="hole-guide" style="top: calc(50% + 40mm);"></div>
 
+<!-- Header WEB -->
 <header>
     <div>
         <h1>Arquitectura del Personaje</h1>
@@ -255,14 +272,20 @@
         </button>
         <button onclick="window.print()" class="primary">
             <svg class="icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
-            Imprimir PDF
+            Imprimir
         </button>
     </div>
 </header>
 
 <main>
+    <!-- Header IMPRESIÓN (Solo visible al imprimir) -->
+    <div class="print-title">
+        <h1>Arquitectura del Personaje</h1>
+        <p>Lienzo de Diseño Narrativo</p>
+    </div>
+
     <!-- INTRO -->
-    <div class="card" style="padding: 30px;">
+    <div class="card intro-card" style="padding: 30px;">
         <label>Nombre Completo</label>
         <input type="text" id="nombre" class="hero-input" placeholder="Nombre del personaje...">
         
@@ -343,7 +366,7 @@
 
             <div class="form-group">
                 <label>La Mentira que se cuenta</label>
-                <div class="helper-text">¿Qué idea falsa cree sobre sí mismo para no sufrir?</div>
+                <div class="helper-text">¿Qué idea falsa cree sobre sí mismo o el mundo para no sufrir?</div>
                 <input type="text" id="mentira">
             </div>
 
@@ -376,6 +399,10 @@
             <span>▼</span>
         </div>
         <div class="section-content">
+            <div class="helper-text" style="font-weight:bold; margin-bottom:15px; border-left:3px solid #cbd5e1; padding-left:10px;">
+                "Cómo el lector lo percibe en la página."
+            </div>
+            
             <div class="grid-2">
                 <div class="form-group">
                     <label>Rasgo físico distintivo</label>
@@ -552,7 +579,7 @@
                 <select id="relType" style="flex:1;">
                     <option value="stable">Estable (—)</option>
                     <option value="distant">Distante (---)</option>
-                    <option value="conflict">Conflicto (···)</option>
+                    <option value="conflict">Conflicto (~~~)</option>
                 </select>
                 <button class="primary" onclick="addRelation()">Agregar</button>
             </div>
@@ -805,18 +832,16 @@
         const total = state.relaciones.length;
         if(total === 0) return;
 
-        // RADIO AUMENTADO: 220px para asegurar espacio para la línea
-        const radius = 220; 
+        const radius = 220; // Radio amplio para que las líneas se vean bien
         
         state.relaciones.forEach((rel, index) => {
             const angle = (index / total) * 2 * Math.PI;
             const x = Math.cos(angle) * radius;
             const y = Math.sin(angle) * radius;
 
-            // NODO SATÉLITE
+            // NODO
             const node = document.createElement('div');
             node.className = 'node';
-            // Posicionamiento desde el centro absoluto
             node.style.left = `calc(50% + ${x}px)`;
             node.style.top = `calc(50% + ${y}px)`;
             node.style.transform = 'translate(-50%, -50%)';
@@ -829,11 +854,10 @@
                 <div class="delete-btn" onclick="removeRelation(${rel.id})">×</div>
             `;
 
-            // LÍNEA CONECTORA
+            // LÍNEA
             const line = document.createElement('div');
-            // Largo = Radio - RadioNodoCentral/2 - RadioNodoSatelite/2 aprox
-            // 220 (radio total) - 55 (radio central) - 45 (radio nodo) = 120px de línea visible
-            const length = 220; 
+            // Largo de la línea
+            const length = radius; 
             
             let typeClass = 'line-stable';
             if(rel.type === 'distant') typeClass = 'line-distant';
@@ -842,16 +866,16 @@
             line.className = `line ${typeClass}`;
             line.style.width = `${length}px`;
             
-            // Rotar desde el centro
+            // Rotación desde el centro
             line.style.transform = `translateY(-50%) rotate(${angle * (180/Math.PI)}deg)`;
 
-            // Z-Index truco: Poner líneas primero para que queden debajo de los nodos
+            // Z-Index: Insertar antes del centro para que quede debajo
             box.insertBefore(line, center);
             box.appendChild(node);
         });
     }
     
-    // Re-renderizar sociograma al cambiar tamaño ventana
+    // Re-renderizar al cambiar tamaño
     window.addEventListener('resize', renderSociogram);
 </script>
 
