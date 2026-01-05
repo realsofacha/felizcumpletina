@@ -133,6 +133,11 @@
             background: var(--primary); color: white; border: none;
             width: 110px; height: 110px; font-size: 0.9rem;
             z-index: 20;
+            cursor: text; /* Indica que es editable */
+        }
+        .node.main:focus {
+            outline: 2px dashed white;
+            background: #4338ca;
         }
         
         .line {
@@ -173,8 +178,9 @@
 
             body { 
                 background: white; color: black; font-size: 11pt;
-                /* Márgenes de contenido */
-                margin: 15mm 20mm 15mm 30mm !important; 
+                /* MÁRGENES ACTUALIZADOS: Más aire arriba y abajo */
+                /* Top: 25mm, Right: 20mm, Bottom: 25mm, Left: 30mm (para agujeros) */
+                margin: 25mm 20mm 25mm 30mm !important; 
             }
             
             /* Título especial para la primera página */
@@ -818,21 +824,38 @@
 
     function renderSociogram() {
         const box = document.getElementById('sociogramBox');
-        const charName = document.getElementById('nombre').value || "TU PERSONAJE";
+        
+        // Recuperar nombre central personalizado o usar el del formulario
+        const savedData = JSON.parse(localStorage.getItem('charData_V2') || '{}');
+        const charName = savedData.centerLabel || document.getElementById('nombre').value || "TU PERSONAJE";
         
         box.innerHTML = ''; // Limpiar
 
-        // Nodo central
+        // Nodo central EDITABLE
         const center = document.createElement('div');
         center.className = 'node main';
+        center.contentEditable = true; // Habilitar edición
         center.innerText = charName;
+        
+        // Guardar cambios al editar el centro
+        center.addEventListener('input', function() {
+            const data = JSON.parse(localStorage.getItem('charData_V2') || '{}');
+            data.centerLabel = this.innerText;
+            localStorage.setItem('charData_V2', JSON.stringify(data));
+        });
+        
+        // Evitar saltos de línea al pulsar Enter
+        center.addEventListener('keydown', (e) => { 
+            if(e.key === 'Enter') e.preventDefault(); 
+        });
+
         box.appendChild(center);
 
         // Satélites
         const total = state.relaciones.length;
         if(total === 0) return;
 
-        const radius = 220; // Radio amplio para que las líneas se vean bien
+        const radius = 220; 
         
         state.relaciones.forEach((rel, index) => {
             const angle = (index / total) * 2 * Math.PI;
@@ -856,7 +879,6 @@
 
             // LÍNEA
             const line = document.createElement('div');
-            // Largo de la línea
             const length = radius; 
             
             let typeClass = 'line-stable';
@@ -866,10 +888,8 @@
             line.className = `line ${typeClass}`;
             line.style.width = `${length}px`;
             
-            // Rotación desde el centro
             line.style.transform = `translateY(-50%) rotate(${angle * (180/Math.PI)}deg)`;
 
-            // Z-Index: Insertar antes del centro para que quede debajo
             box.insertBefore(line, center);
             box.appendChild(node);
         });
