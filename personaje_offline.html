@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura del Personaje (Completo)</title>
+    <style>
+        /* --- ESTILOS BASE (CSS PURO) --- */
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #cbd5e1;
+            --bg: #f1f5f9;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding-bottom: 80px;
+            line-height: 1.5;
+        }
+
+        /* HEADER */
+        header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        h1 { margin: 0; font-size: 1.4rem; color: #0f172a; }
+        .subtitle { font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; }
+
+        /* BOTONES */
+        .btn-group { display: flex; gap: 10px; }
+        button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        button:hover { background: #f8fafc; }
+        button.primary { background: var(--primary); color: white; border-color: var(--primary); }
+        button.primary:hover { background: #4338ca; }
+        button.danger { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+        
+        /* ESTRUCTURA */
+        main { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .section-header {
+            padding: 15px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .section-header:hover { background: #f1f5f9; }
+        .section-title { font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        .section-content { padding: 25px; display: none; }
+        .section-content.open { display: block; }
+
+        /* FORMULARIOS */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        .form-group { margin-bottom: 20px; }
+        
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-style: italic;
+            line-height: 1.3;
+        }
+
+        input[type="text"], textarea, select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        input:focus, textarea:focus { outline: 2px solid var(--primary); border-color: transparent; }
+        
+        /* Intro Input Gigante */
+        .hero-input {
+            font-size: 2rem;
+            border: none !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+            border-radius: 0;
+            padding: 5px 0;
+            background: transparent !important;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        /* SOCIOGRAMA */
+        .sociogram-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f8fafc;
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .sociogram-controls { display: flex; gap: 10px; margin-bottom: 15px; }
+        
+        .node {
+            position: absolute;
+            background: white;
+            border: 2px solid #64748b;
+            border-radius: 50%;
+            width: 100px; height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 2;
+            padding: 5px;
+        }
+        .node.main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px; height: 120px;
+            font-size: 1rem;
+            z-index: 10;
+        }
+        
+        .line {
+            position: absolute;
+            transform-origin: 0 50%;
+            z-index: 1;
+        }
+        .line-stable { border-top: 2px solid #64748b; }
+        .line-distant { border-top: 2px dashed #64748b; }
+        .line-conflict { 
+            background: repeating-linear-gradient(45deg, transparent, transparent 2px, #ef4444 2px, #ef4444 4px);
+            height: 4px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -5px; right: -5px;
+            width: 24px; height: 24px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            border: 2px solid white;
+        }
+
+        /* --- IMPRESIÓN --- */
+        @media print {
+            body { background: white; color: black; font-size: 11pt; }
+            header, .sociogram-controls, button, footer { display: none !important; }
+            .card { box-shadow: none; border: none; padding: 0; margin-bottom: 30px; page-break-inside: avoid; }
+            .section-header { border-bottom: 2px solid black; padding-left: 0; pointer-events: none; }
+            .section-content { display: block !important; padding: 10px 0; }
+            input, textarea, select { 
+                border: none; border-bottom: 1px solid #999; 
+                border-radius: 0; padding: 0; 
+                font-family: 'Courier New', monospace; 
+                resize: none; 
+                min-height: 1.5em;
+            }
+            .hero-input { border-bottom: 2px solid black !important; }
+            .helper-text { color: #444; font-size: 9pt; margin-top: 2px; }
+            /* Mostrar descripciones completas en impresión */
+            .grid-2 { grid-template-columns: 1fr 1fr; gap: 30px; }
+            .sociogram-box { border: 1px solid #000; background: white; }
+            .node { border-color: black; color: black; box-shadow: none; }
+            .node.main { background: white; border: 3px solid black; color: black; }
+        }
+        
+        /* Iconos SVG simples */
+        .icon { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>Arquitectura del Personaje</h1>
+        <div class="subtitle">Herramienta de Diseño Narrativo</div>
+    </div>
+    <div class="btn-group">
+        <button onclick="clearData()" class="danger">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Borrar
+        </button>
+        <button onclick="window.print()" class="primary">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+            Imprimir PDF
+        </button>
+    </div>
+</header>
+
+<main>
+    <!-- INTRO -->
+    <div class="card" style="padding: 30px;">
+        <label>Nombre Completo</label>
+        <input type="text" id="nombre" class="hero-input" placeholder="Nombre del personaje...">
+        
+        <div class="grid-2" style="margin-top: 20px;">
+            <div class="form-group">
+                <label>Arquetipo en una palabra</label>
+                <div class="helper-text">(El rebelde, la cuidadora, el cínico, etc.)</div>
+                <input type="text" id="arquetipo">
+            </div>
+            <div class="form-group">
+                <label>Rol en la trama</label>
+                <div class="helper-text">(Protagonista, Antagonista, Aliado, etc.)</div>
+                <input type="text" id="rol">
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. IDENTIDAD -->
+    <div class="card">
+        <div class="section-header" onclick="toggle(this)">
+            <div class="section-title">
+                <span style="background:#eef2ff; color:#4f46e5; padding:5px; border-radius:5px;">1</span>
+                Identidad y Concepto
+            </div>
+            <span>▼</span>
+        </div>
+        <div class="section-content open">
+            <div class="helper-text" style="font-weight:bold; margin-bottom:15px; border-left:3px solid #cbd5e1; padding-left:10px;">
+                "El objetivo es fijar la imagen mental del personaje y su lugar en la obra."
+            </div>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Apodo/s y quién se los dice</label>
+                    <input type="text" id="apodos">
+                </div>
+                <div class="form-group">
+                    <label>Edad y fecha de nacimiento</label>
+                    <input type="text" id="edad">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Ocupación / Oficio</label>
+                <input type="text" id="ocupacion">
+            </div>
+            <div class="form-group">
+                <label>Contradicción Principal</label>
+                <div class="helper-text">(Ejemplo: Es un soldado valiente que le teme a la oscuridad)</div>
+                <input type="text" id="contradiccion">
+            </div>
+            <div class="form-group">
+                <label>Concepto Central (Logline)</label>
+                <div class="helper-text">"Es un/a [Adjetivo] que quiere [Objetivo] pero se enfrenta a [Obstáculo]"</div>
+                <textarea id="concepto" rows="2"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MOTOR INTERNO -->
+    <div class="card">
+        <div class="section-header" onclick="toggle(this)">
+            <div class="section-title">
+                <span style="background:#eef2ff; color:#4f46e5; padding:5px; border-radius:5px;">2</span>
+                El Motor Interno
+            </div>
+            <span>▼</span>
+        </div>
+        <div class="section-content">
+            <div class="helper-text" style="font-weight:bold; margin-bottom:15px; border-left:3px solid #cbd5e1; padding-left:10px;">
+                "Esto es lo que define sus decisiones."
+            </div>
+
+            <div class="form-group" style="background:#fff1f2; padding:15px; border-radius:8px; border:1px solid #fecaca;">
+                <label style="color:#991b1b;">La Herida (El Fantasma)</label>
+                <div class="helper-text">Un evento del pasado que todavía le duele o condiciona sus acciones.</div>
+                <textarea id="herida" rows="2" style="border-color:#fca5a5;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>La Mentira que se cuenta</label>
+                <div class="helper-text">¿Qué idea falsa cree sobre sí mismo o el mundo para no sufrir? (Ej: "No necesito a nadie", "Solo gana el más fuerte")</div>
+                <input type="text" id="mentira">
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Lo que CREE que quiere (Deseo)</label>
+                    <input type="text" id="deseo">
+                </div>
+                <div class="form-group">
+                    <label>Lo que REALMENTE necesita (Necesidad)</label>
+                    <input type="text" id="necesidad">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Línea Roja</label>
+                <div class="helper-text">¿Qué es lo que este personaje juró que NUNCA haría?</div>
+                <input type="text" id="lineaRoja">
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. PRESENCIA FÍSICA -->
+    <div class="card">
+        <div class="section-header" onclick="toggle(this)">
+            <div class="section-title">
+                <span style="background:#eef2ff; color:#4f46e5; padding:5px; border-radius:5px;">3</span>
+                Presencia Física
+            </div>
+            <span>▼</span>
+        </div>
+        <div class="section-content">
+            <div class="helper-text" style="font-weight:bold; margin-bottom:15px; border-left:3px solid #cbd5e1; padding-left:10px;">
+                "Cómo el lector lo percibe en la página."
+            </div>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Rasgo físico distintivo</label>
+                    <div class="helper-text">(Eso que el narrador mencionará más de una vez)</div>
+                    <input type="text" id="rasgoFisico">
+                </div>
+                <div class="form-group">
+                    <label>El "Delatador"</label>
+                    <div class="helper-text">(Ej: Un gesto inconsciente que hace cuando miente o está nervioso)</div>
+                    <input type="text" id="delatador">
+                </div>
+            </div>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Estilo de movimiento</label>
+                    <div class="helper-text">¿Es torpe, elegante, ocupa mucho espacio, se encoge?</div>
+                    <input type="text" id="movimiento">
+                </div>
+                <div class="form-group">
+                    <label>Objetos con carga emocional</label>
+                    <div class="helper-text">(Ej: Algo que siempre lleva encima y por qué)</div>
+                    <input type="text" id="objetos">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Firma sensorial</label>
+                <div class="helper-text">¿A qué huele? ¿Cómo es su tacto? ¿Qué sonido hace al llegar?</div>
+                <input type="text" id="sensorial">
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. VOZ Y COMPORTAMIENTO -->
+    <div class="card">
+        <div class="section-header" onclick="toggle(this)">
+            <div class="section-title">
+                <span style="background:#eef2ff; color:#4f46e5; padding:5px; border-radius:5px;">4</span>
+                Voz y Comportamiento
+            </div>
+            <span>▼</span>
+        </div>
+        <div class="section-content">
+            <div class="helper-text" style="font-weight:bold; margin-bottom:15px; border-left:3px solid #cbd5e1; padding-left:10px;">
+                "Para que el diálogo sea único y no suene igual al de otros personajes."
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Tono de voz y ritmo</label>
+                    <div class="helper-text">(Habla rápido, susurra, es gritón, usa palabras cultas)</div>
+                    <input type="text" id="tono">
+                </div>
+                <div class="form-group">
+                    <label>Muletilla o palabra recurrente</label>
+                    <input type="text" id="muletilla">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Actitud frente a la autoridad</label>
+                    <input type="text" id="autoridad">
+                </div>
+                <div class="form-group">
+                    <label>Sentido del humor</label>
+                    <div class="helper-text">(Irónico, nulo, infantil, negro)</div>
+                    <input type="text" id="humor">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Dos frases típicas que diría:</label>
+                <input type="text" id="frase1" placeholder="1..." style="margin-bottom:10px;">
+                <input type="text" id="frase2" placeholder="2...">
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. MAPA SOCIAL -->
+    <div class="card">
+        <div class="section-header" onclick="toggle(this)">
+            <div class="section-title">
+                <span style="background:#eef2ff; color:#4f46e5; padding:5px; border-radius:5px;">5</span>
+                El Mapa Social
+            </div>
+            <span>▼</span>
+        </div>
+        <div class="section-content">
+            <div class="helper-text" style="font-weight:bold; margin-bottom:15px; border-left:3px solid #cbd5e1; padding-left:10px;">
+                "Ubicar al personaje en su red de contactos y entender su reputación."
+            </div>
+
+            <h3 style="border-bottom:1px solid #eee; padding-bottom:5px; font-size:1rem;">1. Círculos de Pertenencia</h3>
+            
+            <div class="form-group">
+                <label>Familia</label>
+                <div class="helper-text">¿Es un núcleo sólido, roto, ausente, tóxico?</div>
+                <input type="text" id="familia">
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Círculo Íntimo</label>
+                    <div class="helper-text">Amigos, pareja, o aliados en los que confía.</div>
+                    <input type="text" id="circuloIntimo">
+                </div>
+                <div class="form-group">
+                    <label>Círculo Funcional</label>
+                    <div class="helper-text">Colegas, jefes, subordinados.</div>
+                    <input type="text" id="circuloFuncional">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Círculo de Interés (Ideología/Hobbies)</label>
+                    <div class="helper-text">Clubes, religión, militancia, grupos de ocio.</div>
+                    <input type="text" id="circuloInteres">
+                </div>
+                <div class="form-group">
+                    <label>Círculos "Extraños" o Periféricos</label>
+                    <div class="helper-text">Grupos con los que se cruza, pero no encaja (ej: otra clase social, extraños en un bar).</div>
+                    <input type="text" id="circuloExtrano">
+                </div>
+            </div>
+
+            <h3 style="border-bottom:1px solid #eee; padding-bottom:5px; margin-top:20px; font-size:1rem;">2. Estatus y Poder Social</h3>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Imagen Pública</label>
+                    <div class="helper-text">¿Cómo lo ve el mundo? ¿Cuál es su función reconocida? (Ej: "El que resuelve problemas", "El bufón")</div>
+                    <input type="text" id="imagenPublica">
+                </div>
+                <div class="form-group">
+                    <label>Autoimagen</label>
+                    <div class="helper-text">¿Cómo se ve él mismo? (Ej: Un impostor, una víctima, un líder)</div>
+                    <input type="text" id="autoimagen">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Nivel de influencia (1-10)</label>
+                <div class="helper-text">¿Qué capacidad tiene de pedir favores o ser escuchado? (Bajo -> Alto)</div>
+                <input type="text" id="influencia" placeholder="Ej: 8 (Alto)">
+            </div>
+
+            <div class="form-group">
+                <label>¿Es un "Insider" o un "Outsider"?</label>
+                <div class="helper-text">¿Se siente parte del sistema en el que vive o un observador externo?</div>
+                <input type="text" id="insiderOutsider">
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. SOCIOGRAMA -->
+    <div class="card">
+        <div class="section-header" onclick="toggle(this)">
+            <div class="section-title">
+                <span style="background:#eef2ff; color:#4f46e5; padding:5px; border-radius:5px;">6</span>
+                El Sociograma (Visual)
+            </div>
+            <span>▼</span>
+        </div>
+        <div class="section-content">
+            <div class="helper-text" style="font-weight:bold; margin-bottom:15px; border-left:3px solid #cbd5e1; padding-left:10px;">
+                "En el centro del círculo va el nombre de tu personaje."
+            </div>
+            
+            <div class="sociogram-controls">
+                <input type="text" id="relName" placeholder="Nombre de otro personaje..." style="flex:2;">
+                <select id="relType" style="flex:1;">
+                    <option value="stable">Estable (─)</option>
+                    <option value="distant">Distante (---)</option>
+                    <option value="conflict">Conflicto (~~~)</option>
+                </select>
+                <button class="primary" onclick="addRelation()">Agregar</button>
+            </div>
+
+            <div id="sociogramBox" class="sociogram-box">
+                <!-- JS insertará aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. DINÁMICA DE GRUPO -->
+    <div class="card">
+        <div class="section-header" onclick="toggle(this)">
+            <div class="section-title">
+                <span style="background:#eef2ff; color:#4f46e5; padding:5px; border-radius:5px;">7</span>
+                Dinámicas de Grupo
+            </div>
+            <span>▼</span>
+        </div>
+        <div class="section-content">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>El Vínculo de Anclaje</label>
+                    <div class="helper-text">¿Quién es la única persona que logra calmar al personaje?</div>
+                    <input type="text" id="anclaje">
+                </div>
+                <div class="form-group">
+                    <label>Ayuda Práctica</label>
+                    <div class="helper-text">¿A quién busca cuando tiene un problema de dinero o ayuda física?</div>
+                    <input type="text" id="ayudaPractica">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Ayuda Emocional</label>
+                    <div class="helper-text">¿A quién busca cuando tiene un problema emocional?</div>
+                    <input type="text" id="ayudaEmocional">
+                </div>
+                <div class="form-group">
+                    <label>¿A quién protege?</label>
+                    <input type="text" id="protegido">
+                </div>
+            </div>
+
+            <hr style="border:0; border-top:1px dashed #cbd5e1; margin:20px 0;">
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>El Vínculo de Tensión</label>
+                    <div class="helper-text">¿A quién detesta? ¿Qué parte de sí mismo ve reflejada en esa persona?</div>
+                    <input type="text" id="tension">
+                </div>
+                <div class="form-group">
+                    <label>Mayor Obstáculo Social</label>
+                    <div class="helper-text">¿Qué/quién es su mayor "freno" social?</div>
+                    <input type="text" id="obstaculo">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Envidia</label>
+                    <div class="helper-text">¿Qué es lo que más envidia de otro personaje?</div>
+                    <input type="text" id="envidia">
+                </div>
+                <div class="form-group">
+                    <label>El Vínculo Espejo</label>
+                    <div class="helper-text">¿Qué otro personaje representa lo que él pudo haber sido?</div>
+                    <input type="text" id="espejo">
+                </div>
+            </div>
+
+            <hr style="border:0; border-top:1px dashed #cbd5e1; margin:20px 0;">
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Zona de Confort</label>
+                    <div class="helper-text">¿En qué grupo se siente más cómodo y por qué?</div>
+                    <input type="text" id="pezDentro">
+                </div>
+                <div class="form-group">
+                    <label>Zona de Discomfort</label>
+                    <div class="helper-text">¿Y en qué entorno social no? ¿Qué siente? (Vergüenza, enojo...)</div>
+                    <input type="text" id="pezFuera">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. ARCO -->
+    <div class="card">
+        <div class="section-header" onclick="toggle(this)">
+            <div class="section-title">
+                <span style="background:#eef2ff; color:#4f46e5; padding:5px; border-radius:5px;">8</span>
+                Arco de Transformación
+            </div>
+            <span>▼</span>
+        </div>
+        <div class="section-content">
+            <div class="helper-text" style="font-weight:bold; margin-bottom:15px; border-left:3px solid #cbd5e1; padding-left:10px;">
+                "Cómo planeas que cambie el personaje desde el inicio al fin."
+            </div>
+
+            <div class="form-group">
+                <label>Punto A (Inicio)</label>
+                <div class="helper-text">¿En qué estado emocional y social arranca?</div>
+                <textarea id="puntoA" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>El Detonante</label>
+                <div class="helper-text">¿Qué evento lo obliga a cambiar?</div>
+                <input type="text" id="detonante">
+            </div>
+
+            <div class="form-group">
+                <label>Sacrificio</label>
+                <div class="helper-text">¿Qué tiene que perder o dejar atrás para ganar su objetivo?</div>
+                <input type="text" id="sacrificio">
+            </div>
+
+            <div class="form-group">
+                <label>Punto B (Final)</label>
+                <div class="helper-text">¿Cómo es su nueva visión del mundo tras la historia?</div>
+                <textarea id="puntoB" rows="2"></textarea>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    // --- LÓGICA JAVASCRIPT ---
+    const state = {
+        relaciones: []
+    };
+
+    // Al cargar
+    window.addEventListener('DOMContentLoaded', () => {
+        load();
+        
+        // Auto-guardado en inputs
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+            if(el.id === 'relName' || el.id === 'relType') return;
+            el.addEventListener('input', () => {
+                saveInput(el.id, el.value);
+                if(el.tagName === 'TEXTAREA') autoResize(el);
+            });
+        });
+
+        // Nombre central
+        const nameInput = document.getElementById('nombre');
+        nameInput.addEventListener('input', renderSociogram);
+    });
+
+    function toggle(header) {
+        const content = header.nextElementSibling;
+        const icon = header.querySelector('span:last-child');
+        
+        if (content.style.display === 'block' || content.classList.contains('open')) {
+            content.style.display = 'none';
+            content.classList.remove('open');
+            icon.innerText = '▼';
+        } else {
+            content.style.display = 'block';
+            content.classList.add('open');
+            icon.innerText = '▲';
+        }
+    }
+
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+    }
+
+    // --- DATOS ---
+    function saveInput(id, value) {
+        let data = JSON.parse(localStorage.getItem('charData_V2') || '{}');
+        data[id] = value;
+        localStorage.setItem('charData_V2', JSON.stringify(data));
+    }
+
+    function saveRelations() {
+        let data = JSON.parse(localStorage.getItem('charData_V2') || '{}');
+        data.relaciones = state.relaciones;
+        localStorage.setItem('charData_V2', JSON.stringify(data));
+    }
+
+    function load() {
+        const saved = localStorage.getItem('charData_V2');
+        if(saved) {
+            const data = JSON.parse(saved);
+            
+            // Cargar inputs
+            Object.keys(data).forEach(key => {
+                if(key === 'relaciones') {
+                    state.relaciones = data[key];
+                } else {
+                    const el = document.getElementById(key);
+                    if(el) { 
+                        el.value = data[key];
+                        if(el.tagName === 'TEXTAREA') autoResize(el);
+                    }
+                }
+            });
+        }
+        renderSociogram();
+    }
+
+    function clearData() {
+        if(confirm("¿Borrar todo?")) {
+            localStorage.removeItem('charData_V2');
+            location.reload();
+        }
+    }
+
+    // --- SOCIOGRAMA ---
+    function addRelation() {
+        const nameEl = document.getElementById('relName');
+        const typeEl = document.getElementById('relType');
+        const name = nameEl.value.trim();
+        if(!name) return;
+
+        state.relaciones.push({ id: Date.now(), name, type: typeEl.value });
+        nameEl.value = '';
+        saveRelations();
+        renderSociogram();
+    }
+
+    function removeRelation(id) {
+        state.relaciones = state.relaciones.filter(r => r.id !== id);
+        saveRelations();
+        renderSociogram();
+    }
+
+    function renderSociogram() {
+        const box = document.getElementById('sociogramBox');
+        const charName = document.getElementById('nombre').value || "TU PERSONAJE";
+        
+        box.innerHTML = ''; // Limpiar
+
+        // Nodo central
+        const center = document.createElement('div');
+        center.className = 'node main';
+        center.innerText = charName;
+        box.appendChild(center);
+
+        // Satélites
+        const total = state.relaciones.length;
+        if(total === 0) return;
+
+        const radius = 120; // Distancia del centro
+        const centerX = box.offsetWidth / 2;
+        const centerY = box.offsetHeight / 2;
+
+        // Aseguramos que el contenedor tenga tamaño relativo si no se ha renderizado bien
+        if(centerX === 0) { setTimeout(renderSociogram, 100); return; }
+
+        state.relaciones.forEach((rel, index) => {
+            const angle = (index / total) * 2 * Math.PI;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+
+            // Nodo
+            const node = document.createElement('div');
+            node.className = 'node';
+            node.style.left = `calc(50% + ${x}px)`;
+            node.style.top = `calc(50% + ${y}px)`;
+            node.style.transform = 'translate(-50%, -50%)';
+            
+            node.innerHTML = `
+                ${rel.name}
+                <div class="delete-btn" onclick="removeRelation(${rel.id})">×</div>
+            `;
+
+            // Línea
+            const line = document.createElement('div');
+            // Calculamos largo distancia entre centro y nodo
+            const length = Math.sqrt(x*x + y*y) - 50; // -50 para no tapar nodo central
+            
+            let typeClass = 'line-stable';
+            if(rel.type === 'distant') typeClass = 'line-distant';
+            if(rel.type === 'conflict') typeClass = 'line-conflict';
+
+            line.className = `line ${typeClass}`;
+            line.style.width = `${length}px`;
+            line.style.left = `50%`;
+            line.style.top = `50%`;
+            line.style.transform = `translateY(-50%) rotate(${angle * (180/Math.PI)}deg)`;
+            line.style.transformOrigin = "0 50%";
+
+            box.appendChild(line);
+            box.appendChild(node);
+        });
+    }
+    
+    // Re-renderizar sociograma al cambiar tamaño ventana
+    window.addEventListener('resize', renderSociogram);
+</script>
+
+</body>
+</html>
